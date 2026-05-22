@@ -1,376 +1,288 @@
 'use client';
 
-import React, { useState } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Users, 
-  Percent, 
-  ShoppingBag,
-  Eye,
-  MoreVertical,
-  Calendar,
-  ArrowUpRight
-} from 'lucide-react';
-import styles from './page.module.css';
+import React from 'react';
+import Link from 'next/link';
 
-// Mock data for weekly revenue chart
-const chartData = [
-  { day: 'Thứ 2', value: 35, display: '35M ₫' },
-  { day: 'Thứ 3', value: 48, display: '48M ₫' },
-  { day: 'Thứ 4', value: 40, display: '40M ₫' },
-  { day: 'Thứ 5', value: 65, display: '65M ₫' },
-  { day: 'Thứ 6', value: 58, display: '58M ₫' },
-  { day: 'Thứ 7', value: 85, display: '85M ₫' },
-  { day: 'Chủ Nhật', value: 72, display: '72M ₫' },
-];
-
-// Donut data
-const trafficSources = [
-  { source: 'Tìm kiếm', percentage: 40, color: '#10b981', value: '40%' },
-  { source: 'Trực tiếp', percentage: 30, color: '#3b82f6', value: '30%' },
-  { source: 'Mạng xã hội', percentage: 20, color: '#f59e0b', value: '20%' },
-  { source: 'Khác', percentage: 10, color: '#ef4444', value: '10%' },
-];
-
-// Recent registrations/transactions
-const transactions = [
-  { id: '#1254', name: 'Nguyễn Văn Anh', email: 'anh.nv@gmail.com', amount: '1,200,000 ₫', status: 'Thành công', date: 'Hôm nay, 14:23', type: 'success' },
-  { id: '#1253', name: 'Trần Thị Bình', email: 'binh.tt@yahoo.com', amount: '450,000 ₫', status: 'Chờ duyệt', date: 'Hôm nay, 11:05', type: 'pending' },
-  { id: '#1252', name: 'Lê Hoàng Long', email: 'long.lh@hotmail.com', amount: '3,100,000 ₫', status: 'Thành công', date: 'Hôm qua, 18:40', type: 'success' },
-  { id: '#1251', name: 'Phạm Minh Tuấn', email: 'tuan.pm@outlook.com', amount: '890,000 ₫', status: 'Thất bại', date: 'Hôm qua, 15:12', type: 'danger' },
-  { id: '#1250', name: 'Vũ Thị Ngọc', email: 'ngoc.vt@gmail.com', amount: '2,500,000 ₫', status: 'Thành công', date: '20/05/2026', type: 'success' },
-];
-
-export default function Dashboard() {
-  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'weekly' | 'monthly'>('weekly');
-
-  // SVG dimensions & mapping helper
-  const svgWidth = 550;
-  const svgHeight = 200;
-  const paddingX = 40;
-  const paddingY = 20;
-
-  // Calculate SVG coordinates for line chart points
-  const points = chartData.map((d, index) => {
-    const x = paddingX + (index / (chartData.length - 1)) * (svgWidth - paddingX * 2);
-    // Value range 0 - 100 mapped to height
-    const y = svgHeight - paddingY - (d.value / 100) * (svgHeight - paddingY * 2);
-    return { x, y, ...d };
-  });
-
-  // Construct path string
-  const pathString = points.reduce((acc, p, i) => {
-    return i === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`;
-  }, '');
-
-  // Construct area path string (needs to close the loop at the bottom)
-  const areaString = points.length > 0 
-    ? `${pathString} L ${points[points.length - 1].x} ${svgHeight - paddingY} L ${points[0].x} ${svgHeight - paddingY} Z` 
-    : '';
-
-  // Donut chart calculations
-  let accumulatedPercent = 0;
-
+export default function DashboardHome() {
   return (
-    <div className={styles.pageContainer}>
-      {/* Welcome banner */}
-      <div className={styles.welcomeSection}>
-        <div className={styles.titleGroup}>
-          <h1>Tổng Quan Hệ Thống</h1>
-          <p>Chào mừng trở lại! Dưới đây là thống kê hoạt động mới nhất của dự án.</p>
-        </div>
-        <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-          <button className={styles.datePicker}>
-            <Calendar size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-            21 Tháng 5, 2026
-          </button>
-        </div>
+    <div className="space-y-6">
+      {/* Welcome Header (Mobile Only) */}
+      <div className="md:hidden mb-6">
+        <h1 className="font-headline-lg text-headline-lg text-on-surface">Hello, Admin</h1>
+        <p className="text-secondary text-body-md">Here&apos;s what&apos;s happening today.</p>
       </div>
 
-      {/* Metrics Cards Grid */}
-      <div className={styles.statGrid}>
-        {/* Metric 1 */}
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Doanh Thu Tuần</span>
-            <div className={styles.statIconWrapper}>
-              <DollarSign size={20} />
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        {/* Statistical Cards (4 columns each) */}
+        {/* Card 1: TOTAL VIEWS */}
+        <div className="md:col-span-4 glass-panel rounded-xl p-6 group hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 cursor-pointer">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-secondary font-label-lg text-label-lg mb-1">TOTAL VIEWS</p>
+              <h3 className="font-headline-lg text-headline-lg text-on-surface">2.4M</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-primary-container/10 text-primary-container flex items-center justify-center">
+              <span className="material-symbols-outlined">visibility</span>
             </div>
           </div>
-          <div className={styles.statValue}>430M ₫</div>
-          <div className={styles.statFooter}>
-            <span className={styles.trendUp}>
-              <TrendingUp size={14} style={{ marginRight: '2px' }} />
-              +12.5%
+          <div className="flex items-end gap-4">
+            <span className="text-green-500 font-bold text-sm flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">trending_up</span> +12%
             </span>
-            <span className={styles.trendLabel}>so với tuần trước</span>
+            <div className="flex-1 h-10 flex items-end gap-1 px-2">
+              <div className="w-2 bg-primary-container/30 h-[20%] rounded-t-sm"></div>
+              <div className="w-2 bg-primary-container/30 h-[40%] rounded-t-sm"></div>
+              <div className="w-2 bg-primary-container/30 h-[30%] rounded-t-sm"></div>
+              <div className="w-2 bg-primary-container/60 h-[60%] rounded-t-sm"></div>
+              <div className="w-2 bg-primary-container/40 h-[45%] rounded-t-sm"></div>
+              <div className="w-2 bg-primary-container/80 h-[80%] rounded-t-sm"></div>
+              <div className="w-2 bg-primary-container h-[100%] rounded-t-sm"></div>
+            </div>
           </div>
         </div>
 
-        {/* Metric 2 */}
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Người Dùng Mới</span>
-            <div className={styles.statIconWrapper} style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', color: '#3b82f6' }}>
-              <Users size={20} />
+        {/* Card 2: REVENUE */}
+        <div className="md:col-span-4 glass-panel rounded-xl p-6 group hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 cursor-pointer">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-secondary font-label-lg text-label-lg mb-1">REVENUE</p>
+              <h3 className="font-headline-lg text-headline-lg text-on-surface">$15,420</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center">
+              <span className="material-symbols-outlined">payments</span>
             </div>
           </div>
-          <div className={styles.statValue}>2,850</div>
-          <div className={styles.statFooter}>
-            <span className={styles.trendUp}>
-              <TrendingUp size={14} style={{ marginRight: '2px' }} />
-              +8.2%
+          <div className="flex items-end gap-4">
+            <span className="text-green-500 font-bold text-sm flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">trending_up</span> +8.4%
             </span>
-            <span className={styles.trendLabel}>so với tuần trước</span>
-          </div>
-        </div>
-
-        {/* Metric 3 */}
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Tỷ Lệ Chuyển Đổi</span>
-            <div className={styles.statIconWrapper} style={{ backgroundColor: 'rgba(245, 158, 11, 0.08)', color: '#f59e0b' }}>
-              <Percent size={20} />
-            </div>
-          </div>
-          <div className={styles.statValue}>3.24%</div>
-          <div className={styles.statFooter}>
-            <span className={styles.trendUp}>
-              <TrendingUp size={14} style={{ marginRight: '2px' }} />
-              +2.4%
-            </span>
-            <span className={styles.trendLabel}>đạt mục tiêu tháng</span>
-          </div>
-        </div>
-
-        {/* Metric 4 */}
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Giao Dịch Thành Công</span>
-            <div className={styles.statIconWrapper} style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--accent)' }}>
-              <ShoppingBag size={20} />
-            </div>
-          </div>
-          <div className={styles.statValue}>1,240</div>
-          <div className={styles.statFooter}>
-            <span className={styles.trendDown}>
-              <TrendingDown size={14} style={{ marginRight: '2px' }} />
-              -1.5%
-            </span>
-            <span className={styles.trendLabel}>giảm nhẹ giữa tuần</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Section */}
-      <div className={styles.chartsSection}>
-        {/* Main Analytics Line Chart */}
-        <div className={styles.chartCard}>
-          <div className={styles.chartHeader}>
-            <h2 className={styles.chartTitle}>Biểu Đồ Doanh Thu</h2>
-            <div className={styles.chartTabs}>
-              <button 
-                onClick={() => setActiveTab('weekly')}
-                className={`${styles.chartTab} ${activeTab === 'weekly' ? styles.chartTabActive : ''}`}
-              >
-                Tuần này
-              </button>
-              <button 
-                onClick={() => setActiveTab('monthly')}
-                className={`${styles.chartTab} ${activeTab === 'monthly' ? styles.chartTabActive : ''}`}
-              >
-                Tháng này
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.chartBody}>
-            <svg className={styles.svgChart} viewBox={`0 0 ${svgWidth} ${svgHeight}`}>
-              <defs>
-                <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.4"/>
-                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0"/>
-                </linearGradient>
-              </defs>
-
-              {/* Horizontal Grid lines */}
-              {[25, 50, 75, 100].map((val) => {
-                const y = svgHeight - paddingY - (val / 100) * (svgHeight - paddingY * 2);
-                return (
-                  <g key={val}>
-                    <line x1={paddingX} y1={y} x2={svgWidth - paddingX} y2={y} className={styles.gridLine} />
-                    <text x={10} y={y + 4} className={styles.gridText}>{val}M</text>
-                  </g>
-                );
-              })}
-
-              {/* Weekly Area */}
-              <path d={areaString} className={styles.chartArea} />
-
-              {/* Weekly Line */}
-              <path d={pathString} className={styles.chartPath} />
-
-              {/* Grid labels */}
-              {points.map((p, idx) => (
-                <g key={idx}>
-                  <text x={p.x} y={svgHeight - 4} textAnchor="middle" className={styles.gridText}>
-                    {p.day}
-                  </text>
-                  
-                  {/* Interactive Dot */}
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r={hoveredPoint === idx ? 6 : 4}
-                    className={styles.chartDot}
-                    onMouseEnter={() => setHoveredPoint(idx)}
-                    onMouseLeave={() => setHoveredPoint(null)}
-                  />
-                </g>
-              ))}
+            <svg className="flex-1 h-10 text-green-500 stroke-current fill-none stroke-2" viewBox="0 0 100 30">
+              <path d="M0,25 Q15,20 25,22 T50,15 T75,10 T100,5" strokeLinecap="round"></path>
             </svg>
-
-            {/* Premium Chart Tooltip */}
-            {hoveredPoint !== null && (
-              <div 
-                className="custom-chart-tooltip"
-                style={{
-                  position: 'absolute',
-                  left: `${(points[hoveredPoint].x / svgWidth) * 100}%`,
-                  top: `${(points[hoveredPoint].y / svgHeight) * 100 - 15}%`,
-                  transform: 'translate(-50%, -100%)',
-                  zIndex: 10,
-                  transition: 'all 0.1s ease',
-                  borderLeft: '3px solid var(--accent)'
-                }}
-              >
-                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{points[hoveredPoint].day}</div>
-                <div style={{ color: 'var(--accent)', marginTop: '2px', fontWeight: 700 }}>{points[hoveredPoint].display}</div>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Traffic Source Donut Chart */}
-        <div className={styles.chartCard}>
-          <div className={styles.chartHeader}>
-            <h2 className={styles.chartTitle}>Nguồn Truy Cập</h2>
-            <button className={styles.actionBtn}>
-              <MoreVertical size={16} />
-            </button>
+        {/* Card 3: NEW USERS */}
+        <div className="md:col-span-4 glass-panel rounded-xl p-6 group hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 cursor-pointer">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-secondary font-label-lg text-label-lg mb-1">NEW USERS</p>
+              <h3 className="font-headline-lg text-headline-lg text-on-surface">1,284</h3>
+            </div>
+            <div className="p-2 rounded-lg bg-tertiary-container/10 text-tertiary flex items-center justify-center">
+              <span className="material-symbols-outlined">person_add</span>
+            </div>
+          </div>
+          <div className="flex items-end gap-4">
+            <span className="text-tertiary font-bold text-sm flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">trending_up</span> +22%
+            </span>
+            <div className="flex-1 h-10 flex items-center justify-end gap-[-4px]">
+              <div className="w-8 h-8 rounded-full border-2 border-surface bg-surface-variant overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="U1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7BHk8opuyYPRs0Ytbp6o5XVqxIODL3fcWiGXvnQzskpCiKtEWJhsbLCu9V_YAx8_ZLIVjuqRwszHfrZKnAK0kObtxWZzmpxyoInfl1FmHsXLnHc5HkhACglAsjgKZE8M6QXPOO8XsGjwwlt3Lw6fSLiWIFNWG66Fx5hsJi4fzaUjNN4pBcdS7kCXgjmPRLJrsm-r44xjovkogrcTGF8oJNQpZCSwmc8l0CIL9EZ9mDzVTNcpHVy2tudP3YOPc55E17ISPKizaoLI" className="w-full h-full object-cover" />
+              </div>
+              <div className="w-8 h-8 rounded-full border-2 border-surface bg-surface-variant -ml-3 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="U2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuYG2Elt7xtQ6meeUbKuBJKFx5VUoODZqRyRRG4sDukit8NjMMtGY6s9eL_jn6BWmgxIY__nnP51Fu2V6XPYzpY8DR964rQg7ojFczeTD2WYpX7Bj93lCS2FYVGWMXjNtAQ5ihgeFzyoX-fn076EQFg2TTEBDQnDQgMhMJEEVypiVL2sPMWy455fXYVgm0o7LFsFaDV-NiYlpc8XCxLEDfNZiXceTvgpj5ow2qcT-nvdMLV4rFBi7XcUbKGYgJniWSOJPhsoPCv7E" className="w-full h-full object-cover" />
+              </div>
+              <div className="w-8 h-8 rounded-full border-2 border-surface bg-surface-variant -ml-3 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="U3" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2TMYMV10HP3wV8yt_bcYpBYI9EUnLg7PkPmvXOQoO_14WWJ_DZnNAYNQOxr68buxlp0HQr3PJCX30QUdn8xwrYhqedJ3ERQwxPHxYWlokCkXHGLthXK8w0kU27oVGnMtQO4jlagaJxgZbyCA5pMTR1J0WuJ-bAB51af_O6Y_cj13IF3UtHmh9F8Sqf4QUJq08tgKW77uutPKBcCvMNhXxB-ZmcLU6F1s8vAVicgMHMJvVAWXCHsnFl65p24J7eVhTdC6aD2WakHI" className="w-full h-full object-cover" />
+              </div>
+              <div className="w-8 h-8 rounded-full border-2 border-surface bg-primary-container -ml-3 flex items-center justify-center text-[10px] font-bold text-white">+1.2k</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity (8 columns) */}
+        <div className="md:col-span-8 space-y-6">
+          
+          {/* New Uploads Card */}
+          <div className="glass-panel rounded-xl overflow-hidden">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center">
+              <h3 className="font-headline-sm text-headline-sm">New Uploads</h3>
+              <Link href="/products" className="text-primary-container text-label-lg font-label-lg hover:underline transition-all cursor-pointer">
+                View All
+              </Link>
+            </div>
+            
+            <div className="divide-y divide-white/5">
+              
+              {/* Item 1 */}
+              <div className="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors cursor-pointer group">
+                <div className="w-16 h-20 rounded-lg overflow-hidden bg-surface-container-highest relative flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="w-full h-full object-cover" alt="The Midnight Protocol" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqUBizPFNSPJFCEFR2D-00c8fVn7ac09dU3t0ynfdI1ycXnmCEZnIohRp6Ok5CCpCHJ88mn9fi1td9esMoTeuFDYvwKlk0J_avDmX1qTbvVaVb8EX0AS6HCInjiuocqMe9rvkd70sUYEEffGL_NVXVJtYJchExQZe9w1ZtLTh7zvlG3W6qzB-ngWY3lxIA4uEEcEEMiiGvE2bjL_Q88WRIfN3gtGTprAbwE7LN8ju3AE3tWcVFrf24wFawBqz4-9T4RuqmWO3bgzc"/>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
+                    <span className="material-symbols-outlined text-white">play_arrow</span>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-headline-sm text-headline-sm text-on-surface truncate">The Midnight Protocol</h4>
+                  <p className="text-secondary text-body-md truncate">Action / Thriller • 4K • 2h 15m</p>
+                </div>
+                <div className="hidden sm:flex flex-col items-end flex-shrink-0">
+                  <span className="text-label-lg font-label-lg text-green-500">Processing Complete</span>
+                  <span className="text-secondary text-xs">2 hours ago</span>
+                </div>
+                <button className="text-secondary hover:text-white p-1 hover:bg-white/5 rounded transition-colors flex items-center justify-center cursor-pointer">
+                  <span className="material-symbols-outlined">more_vert</span>
+                </button>
+              </div>
+
+              {/* Item 2 */}
+              <div className="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors cursor-pointer group">
+                <div className="w-16 h-20 rounded-lg overflow-hidden bg-surface-container-highest relative flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="w-full h-full object-cover" alt="Echoes of Silence" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4HTzH6yARagr4oeYI8QB-rnz_B0JrKyBznlqoMeydppycA9QqweZrMgvl_3_V4K9PKw6V-PZUUug0y3-g5hK2xGMi3Fnr3yesVM5iZXRSEiULzSAP2d596t9sDnjcc4uhMkBa_Ys-6y9VfPD2pSo7VuIfpdXSapy6eKjXr3f5uH--Kn4v0Emgh_UQ2hDplGM8yCcSS9IU5Wt06FdYRyeajRIX6squR-QxmEAEPhXvOPbZ5a9umjxzCloVxX7_eX6nOU3n_TdiB74"/>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-200">
+                    <span className="material-symbols-outlined text-white">play_arrow</span>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-headline-sm text-headline-sm text-on-surface truncate">Echoes of Silence</h4>
+                  <p className="text-secondary text-body-md truncate">Drama / Sci-Fi • 4K • 1h 48m</p>
+                </div>
+                <div className="hidden sm:flex flex-col items-end flex-shrink-0">
+                  <span className="text-label-lg font-label-lg text-primary-container font-semibold animate-pulse">Uploading (84%)</span>
+                  <span className="text-secondary text-xs">45 mins ago</span>
+                </div>
+                <button className="text-secondary hover:text-white p-1 hover:bg-white/5 rounded transition-colors flex items-center justify-center cursor-pointer">
+                  <span className="material-symbols-outlined">more_vert</span>
+                </button>
+              </div>
+
+            </div>
           </div>
 
-          <div className={styles.chartBody}>
-            <div className={styles.donutContainer}>
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg className={styles.donutSvg}>
-                  {trafficSources.map((source, index) => {
-                    const radius = 70;
-                    const circumference = 2 * Math.PI * radius;
-                    const strokeDashoffset = circumference - (source.percentage / 100) * circumference;
-                    const rotation = (accumulatedPercent / 100) * circumference;
-                    accumulatedPercent += source.percentage;
-
-                    return (
-                      <circle
-                        key={index}
-                        cx="90"
-                        cy="90"
-                        r={radius}
-                        className={styles.donutSegment}
-                        stroke={source.color}
-                        strokeDasharray={`${circumference} ${circumference}`}
-                        strokeDashoffset={strokeDashoffset}
-                        style={{
-                          transform: `rotate(${(rotation / circumference) * 360}deg)`,
-                          transformOrigin: '90px 90px',
-                        }}
-                      />
-                    );
-                  })}
-                </svg>
-                <div className={styles.donutCenter}>
-                  <span className={styles.donutCenterValue}>18.4K</span>
-                  <span className={styles.donutCenterLabel}>Lượt truy cập</span>
+          {/* Secondary Lists / Small Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            
+            {/* Performance Card */}
+            <div className="glass-panel rounded-xl p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-headline-sm text-headline-sm">Performance</h3>
+                <span className="material-symbols-outlined text-secondary">equalizer</span>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-secondary text-body-md">Streaming Quality</span>
+                    <span className="text-green-500 font-bold">Excellent</span>
+                  </div>
+                  <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                    <div className="bg-green-500 h-full w-[98%] rounded-full transition-all duration-500"></div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-secondary text-body-md">Server Load</span>
+                    <span className="text-on-surface font-bold">42%</span>
+                  </div>
+                  <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                    <div className="bg-primary-container h-full w-[42%] rounded-full transition-all duration-500"></div>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Legends */}
-              <div className={styles.donutLegends}>
-                {trafficSources.map((item, idx) => (
-                  <div key={idx} className={styles.legendItem}>
-                    <div className={styles.legendDot} style={{ backgroundColor: item.color }} />
-                    <span style={{ flex: 1 }}>{item.source}</span>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{item.value}</span>
-                  </div>
-                ))}
+            {/* Quick Upload Card */}
+            <div className="glass-panel rounded-xl p-6 flex flex-col items-center justify-center text-center group hover:scale-[1.01] active:scale-[0.99] transition-all duration-300">
+              <div className="w-12 h-12 rounded-full bg-primary-container/20 text-primary-container flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
+                <span className="material-symbols-outlined text-3xl">add</span>
               </div>
+              <h3 className="font-headline-sm text-headline-sm mb-1">Add New Content</h3>
+              <p className="text-secondary text-body-md mb-4">Upload movies, trailers or manage schedules.</p>
+              <button 
+                onClick={() => alert('Chức năng tải lên tệp tin đang được tích hợp...')}
+                className="bg-primary-container text-white px-6 py-2 rounded-full font-label-lg text-label-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer font-semibold shadow-md shadow-primary-container/20"
+              >
+                Upload Now
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Recent Registrations (4 columns) */}
+        <div className="md:col-span-4 glass-panel rounded-xl flex flex-col justify-between">
+          <div>
+            <div className="p-6 border-b border-white/5">
+              <h3 className="font-headline-sm text-headline-sm">New Registrations</h3>
+            </div>
+            
+            <div className="p-2 space-y-1">
+              
+              {/* User 1 */}
+              <div className="p-3 flex items-center gap-3 hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt="User" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUVAmtnMnK4NfNZwVzykt_WGgpbRZxqOIU56NAQe8DnTQv8glIiUO_znpe-qgd9YsqP5wibdCgy6M912wyF73WpZxqjXzOgNak55-fEsawD9k9KBWnQy9BVdj-cp2ttq1iE48VbHfwFg6G0C8sNXNaJf5RZq9ueeQ5-FDCQMxxZHiwCf7BrrD7E2LQo4tXh0bK3FtcWfLjAM6tC_8d2NT-2fAzsIrjCNUhiiO_JEc-CkfbDl7TP2666wzqewad0ai6_C06r0aQams"/>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-label-lg text-label-lg text-on-surface truncate font-semibold">John Doe</p>
+                  <p className="text-xs text-secondary truncate">j.doe@example.com</p>
+                </div>
+                <span className="text-[10px] text-secondary font-bold uppercase flex-shrink-0">5m ago</span>
+              </div>
+
+              {/* User 2 */}
+              <div className="p-3 flex items-center gap-3 hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt="User" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXA0K6hGprGyDJIq0wcqsPwrMceYx_GInCEnyRRZmKXY3-5QT_AoBbaq4vFQvTQXKfbRR3rX70_FbQ1OfjtMCp1RJb_N8QPuE4HPnprvSsXg_F1vVe3PE8CNEr2meyz9ZCqlRjipKC4O5vcMH9XQP_fDOFhNWwPfGk3DfuOaBOc5Ch9gUjL4vQGPm8_CKzSzEcjsYrlGifZ2THqh1OQTpOK1wL2H0f-58AF0rfx6awWwLJBsemctTThGb3E3ZNC-31n6ZiGePC2AI"/>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-label-lg text-label-lg text-on-surface truncate font-semibold">Sarah Parker</p>
+                  <p className="text-xs text-secondary truncate">s.parker@cinema.tv</p>
+                </div>
+                <span className="text-[10px] text-secondary font-bold uppercase flex-shrink-0">12m ago</span>
+              </div>
+
+              {/* User 3 */}
+              <div className="p-3 flex items-center gap-3 hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt="User" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTTidZHHTl9CHDOb-GPTiOWyVFAwzi068yKxpShA3Iz_keT4wwdwT8KNdJPsQnHfNQQE6qtBg1DQrsvNmHlUpRE6oPYqw40pxm7SGrJuUh5YJhoE-dTsN5ahBDKZas12-dkotMmhW7pgrojBKCDvJ5p5EjE4Sj8v7Y_KKXM5S9_6l26YJ3sdW9gRzNGmEvNODf8hP_p4Teoi8Zi4KQq2e1oN6VruWal3absCnSS3ywNvZDcV-hHYIFXm41fXVxGy73Bk-SjSXi3Hw"/>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-label-lg text-label-lg text-on-surface truncate font-semibold">Mike Ross</p>
+                  <p className="text-xs text-secondary truncate">mike.r@stream.com</p>
+                </div>
+                <span className="text-[10px] text-secondary font-bold uppercase flex-shrink-0">24m ago</span>
+              </div>
+
+              {/* User 4 */}
+              <div className="p-3 flex items-center gap-3 hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+                <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img alt="User" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI-j8CmiNo6hHux0UITIEFXSj7glk0h5nBaXGT1Lkq6AYLPcm0bsfwk0KycDH3LTDQmkmMb4hJNgHltBVWFq_pZhExAph1qYdAIa-ts4p3fRbeIB1P5Jffi8e62Vw45QIt9_AlOjnmhz-NXXpEtEGALnwut_iOr1tLHiSlnhDOfotIQ9HF8Zt5f_YhsC-CXUuOknzVUkYZM7OjvYYvFCVmiD3jrM6gcpQvU8nuX25Hs9xg9HR097XTZvgsy1z2Dsi0pL7tYwbkmqM"/>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-label-lg text-label-lg text-on-surface truncate font-semibold">Elena L.</p>
+                  <p className="text-xs text-secondary truncate">e.l@media.net</p>
+                </div>
+                <span className="text-[10px] text-secondary font-bold uppercase flex-shrink-0">1h ago</span>
+              </div>
+
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Recent Activity Table */}
-      <div className={styles.tableCard}>
-        <div className={styles.chartHeader}>
-          <h2 className={styles.chartTitle}>Giao Dịch Gần Đây</h2>
-          <button className={styles.actionBtn} style={{ color: 'var(--accent)', fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Xem tất cả
-            <ArrowUpRight size={14} />
-          </button>
+          
+          <div className="p-4 border-t border-white/5">
+            <Link 
+              href="/users"
+              className="block w-full py-2 text-center text-label-lg font-label-lg text-secondary hover:text-white transition-colors cursor-pointer"
+            >
+              Manage All Users
+            </Link>
+          </div>
         </div>
 
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.th}>Mã Đơn</th>
-                <th className={styles.th}>Khách Hàng</th>
-                <th className={styles.th}>Số Tiền</th>
-                <th className={styles.th}>Thời Gian</th>
-                <th className={styles.th}>Trạng Thái</th>
-                <th className={styles.th}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((tr, idx) => (
-                <tr key={idx} className={styles.tr}>
-                  <td className={styles.td} style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{tr.id}</td>
-                  <td className={styles.td}>
-                    <div className={styles.userCell}>
-                      <div className={styles.userAvatar}>
-                        {tr.name.charAt(0)}
-                      </div>
-                      <div className={styles.userNameGroup}>
-                        <span style={{ fontWeight: 600 }}>{tr.name}</span>
-                        <span className={styles.userEmail}>{tr.email}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className={styles.td} style={{ fontWeight: 600 }}>{tr.amount}</td>
-                  <td className={styles.td} style={{ color: 'var(--text-secondary)' }}>{tr.date}</td>
-                  <td className={styles.td}>
-                    <span className={`${styles.badge} ${
-                      tr.type === 'success' ? styles.badgeSuccess : 
-                      tr.type === 'pending' ? styles.badgePending : 
-                      styles.badgeDanger
-                    }`}>
-                      {tr.status}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <button className={styles.actionBtn}>
-                      <Eye size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   );
