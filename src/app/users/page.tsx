@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Plus, 
@@ -8,12 +8,14 @@ import {
   Trash2, 
   X, 
   ShieldCheck,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import styles from './page.module.css';
+import { api } from '@/utils/api';
 
 interface User {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   role: string;
@@ -21,17 +23,10 @@ interface User {
   joinedDate: string;
 }
 
-const initialUsers: User[] = [
-  { id: 1, name: 'Nguyễn Văn Anh', email: 'anh.nv@gmail.com', role: 'Super Admin', status: 'active', joinedDate: '21/04/2025' },
-  { id: 2, name: 'Trần Thị Bình', email: 'binh.tt@yahoo.com', role: 'Editor', status: 'inactive', joinedDate: '02/09/2025' },
-  { id: 3, name: 'Lê Hoàng Long', email: 'long.lh@hotmail.com', role: 'User', status: 'active', joinedDate: '15/11/2025' },
-  { id: 4, name: 'Phạm Minh Tuấn', email: 'tuan.pm@outlook.com', role: 'User', status: 'active', joinedDate: '10/01/2026' },
-  { id: 5, name: 'Vũ Thị Ngọc', email: 'ngoc.vt@gmail.com', role: 'Editor', status: 'active', joinedDate: '18/03/2026' },
-  { id: 6, name: 'Hoàng Văn Khánh', email: 'khanh.hv@gmail.com', role: 'User', status: 'active', joinedDate: '05/05/2026' },
-];
-
 export default function Users() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -43,32 +38,85 @@ export default function Users() {
   const [newUserRole, setNewUserRole] = useState('User');
   const [newUserStatus, setNewUserStatus] = useState<'active' | 'inactive'>('active');
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const mapBackendUserToFrontend = (bu: any): User => {
+    const roles: string[] = bu.roles || [];
+    let role = 'User';
+    if (roles.includes('ADMIN') || roles.includes('ROLE_ADMIN')) {
+      role = 'Super Admin';
+    } else if (roles.includes('EDITOR') || roles.includes('ROLE_EDITOR')) {
+      role = 'Editor';
+    }
+
+    const isActive = bu.active ?? bu.isActive ?? true;
+
+    return {
+      id: bu.id,
+      name: bu.fullName || bu.username,
+      email: bu.email,
+      role: role,
+      status: isActive ? 'active' : 'inactive',
+      joinedDate: bu.createdAt ? new Date(bu.createdAt).toLocaleDateString('vi-VN') : 'Chưa rõ',
+    };
+  };
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.get<any[]>('/users');
+      const mapped = (res.result || []).map(mapBackendUserToFrontend);
+      setUsers(mapped);
+    } catch (err: any) {
+      setError(err.message || 'Không thể tải danh sách người dùng.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUserName || !newUserEmail) return;
 
-    const newUser: User = {
-      id: Date.now(),
-      name: newUserName,
-      email: newUserEmail,
-      role: newUserRole,
-      status: newUserStatus,
-      joinedDate: new Date().toLocaleDateString('vi-VN'),
-    };
+    setError('');
+    try {
+      const username = newUserEmail.split('@')[0] + Math.floor(Math.random() * 100);
+      await api.post('/auth/register', {
+        username,
+        email: newUserEmail,
+        password: 'Password123!',
+        fullName: newUserName
+      });
 
-    setUsers([newUser, ...users]);
-    setIsModalOpen(false);
+      await fetchUsers();
+      setIsModalOpen(false);
 
-    // Reset Form
-    setNewUserName('');
-    setNewUserEmail('');
-    setNewUserRole('User');
-    setNewUserStatus('active');
+      // Reset Form
+      setNewUserName('');
+      setNewUserEmail('');
+      setNewUserRole('User');
+      setNewUserStatus('active');
+    } catch (err: any) {
+      setError(err.message || 'Không thể tạo tài khoản mới.');
+    }
   };
 
-  const handleDeleteUser = (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')) {
-      setUsers(users.filter(u => u.id !== id));
+  const handleToggleStatus = async (id: string | number, currentStatus: 'active' | 'inactive') => {
+    const newActive = currentStatus === 'inactive';
+    const confirmMsg = newActive 
+      ? 'Bạn có chắc chắn muốn mở khóa tài khoản này?' 
+      : 'Bạn có chắc chắn muốn tạm khóa tài khoản này?';
+
+    if (confirm(confirmMsg)) {
+      try {
+        await api.put(`/users/${id}/status?isActive=${newActive}`);
+        setUsers(users.map(u => u.id === id ? { ...u, status: newActive ? 'active' : 'inactive' } : u));
+      } catch (err: any) {
+        alert(err.message || 'Không thể cập nhật trạng thái người dùng.');
+      }
     }
   };
 
@@ -95,6 +143,12 @@ export default function Users() {
           Thêm Tài Khoản
         </button>
       </div>
+
+      {error && (
+        <div style={{ color: '#ffb4ab', backgroundColor: 'rgba(255, 180, 171, 0.1)', border: '1px solid rgba(255, 180, 171, 0.2)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem' }}>
+          {error}
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className={styles.filterBar}>
@@ -147,7 +201,16 @@ export default function Users() {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td className={styles.td} colSpan={5} style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                      <Loader2 className="animate-spin" size={18} />
+                      Đang tải danh sách người dùng...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className={styles.tr}>
                     <td className={styles.td}>
@@ -185,9 +248,9 @@ export default function Users() {
                           <Edit2 size={15} />
                         </button>
                         <button 
-                          className={`${styles.actionBtn} styles.actionBtnDelete`} 
-                          title="Xóa"
-                          onClick={() => handleDeleteUser(user.id)}
+                          className={`${styles.actionBtn} ${user.status === 'active' ? styles.actionBtnDelete : ''}`} 
+                          title={user.status === 'active' ? 'Tạm khóa' : 'Mở khóa'}
+                          onClick={() => handleToggleStatus(user.id, user.status)}
                         >
                           <Trash2 size={15} />
                         </button>

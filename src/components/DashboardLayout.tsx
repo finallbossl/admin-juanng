@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from './Sidebar';
@@ -15,6 +15,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token && pathname !== '/login') {
+      window.location.href = '/login';
+    } else {
+      setAuthorized(true);
+    }
+  }, [pathname]);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
@@ -30,6 +40,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (pathname === '/login') {
     return <>{children}</>;
+  }
+
+  if (!authorized) {
+    return null;
   }
 
   const menuItems = [

@@ -1,88 +1,139 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Save, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Loader2 } from 'lucide-react';
 import styles from './page.module.css';
+import { api } from '@/utils/api';
 
 export default function Settings() {
-  const [siteName, setSiteName] = useState('AdminPro Dashboard');
-  const [siteUrl, setSiteUrl] = useState('https://adminpro.vn');
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  
+  const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await api.get<any>('/users/my-info');
+        const user = res.result;
+        setUsername(user.username || '');
+        setEmail(user.email || '');
+        setFullName(user.fullName || '');
+        setAvatarUrl(user.avatarUrl || '');
+      } catch (err: any) {
+        setError(err.message || 'Không thể tải thông tin cá nhân.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaved(true);
-    setTimeout(() => {
-      setIsSaved(false);
-    }, 3000);
+    setIsSaved(false);
+    setError('');
+    
+    try {
+      const res = await api.put<any>('/users/my-info', {
+        fullName,
+        avatarUrl
+      });
+      // Save updated user to localStorage
+      localStorage.setItem('user', JSON.stringify(res.result));
+      setIsSaved(true);
+      setTimeout(() => {
+        setIsSaved(false);
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || 'Lỗi khi cập nhật cấu hình cá nhân.');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] w-full items-center justify-center">
+        <Loader2 className="animate-spin text-primary-container" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.titleGroup}>
-        <h1>Cấu Hình Hệ Thống</h1>
-        <p>Quản lý các thiết lập vận hành, thông tin trang web và cấu hình bảo mật chung.</p>
+        <h1>Cấu Hình Tài Khoản Admin</h1>
+        <p>Quản lý các thiết lập cá nhân, thông tin hiển thị và cập nhật hồ sơ quản trị viên.</p>
       </div>
+
+      {error && (
+        <div style={{ color: '#ffb4ab', backgroundColor: 'rgba(255, 180, 171, 0.1)', border: '1px solid rgba(255, 180, 171, 0.2)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem' }}>
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className={styles.settingsCard}>
         <div>
-          <h2 className={styles.sectionTitle}>Thông Tin Dự Án</h2>
+          <h2 className={styles.sectionTitle}>Thông Tin Tài Khoản</h2>
           <div className={styles.formGrid}>
             <div className={styles.formGroup}>
-              <label htmlFor="siteName">Tên Dự Án</label>
+              <label htmlFor="username">Tên Đăng Nhập</label>
               <input 
                 type="text" 
-                id="siteName" 
+                id="username" 
                 className={styles.textInput}
-                value={siteName}
-                onChange={(e) => setSiteName(e.target.value)}
-                required
+                value={username}
+                disabled
+                style={{ opacity: 0.6, cursor: 'not-allowed' }}
               />
             </div>
             
             <div className={styles.formGroup}>
-              <label htmlFor="siteUrl">Địa Chỉ Website</label>
+              <label htmlFor="email">Địa Chỉ Email</label>
               <input 
-                type="url" 
-                id="siteUrl" 
+                type="email" 
+                id="email" 
                 className={styles.textInput}
-                value={siteUrl}
-                onChange={(e) => setSiteUrl(e.target.value)}
-                required
+                value={email}
+                disabled
+                style={{ opacity: 0.6, cursor: 'not-allowed' }}
               />
             </div>
           </div>
         </div>
 
         <div>
-          <h2 className={styles.sectionTitle}>Thông Báo & Vận Hành</h2>
-          <div className={styles.formGrid} style={{ gridTemplateColumns: '1fr' }}>
-            <div className={styles.checkboxGroup}>
+          <h2 className={styles.sectionTitle}>Thông Tin Cá Nhân</h2>
+          <div className={styles.formGrid}>
+            <div className={styles.formGroup}>
+              <label htmlFor="fullName">Họ và Tên</label>
               <input 
-                type="checkbox" 
-                id="emailAlerts" 
-                className={styles.checkboxInput}
-                checked={emailAlerts}
-                onChange={(e) => setEmailAlerts(e.target.checked)}
+                type="text" 
+                id="fullName" 
+                className={styles.textInput}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Nhập họ và tên hiển thị..."
+                required
               />
-              <label htmlFor="emailAlerts" className={styles.checkboxLabel}>
-                Nhận cảnh báo qua email khi có lỗi hệ thống phát sinh hoặc đăng nhập bất thường.
-              </label>
             </div>
-
-            <div className={styles.checkboxGroup}>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="avatarUrl">Đường Dẫn Ảnh Đại Diện</label>
               <input 
-                type="checkbox" 
-                id="maintenanceMode" 
-                className={styles.checkboxInput}
-                checked={maintenanceMode}
-                onChange={(e) => setMaintenanceMode(e.target.checked)}
+                type="url" 
+                id="avatarUrl" 
+                className={styles.textInput}
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://example.com/avatar.jpg"
               />
-              <label htmlFor="maintenanceMode" className={styles.checkboxLabel}>
-                Kích hoạt Chế độ Bảo trì (Bảo trì định kỳ - sẽ hiển thị trang thông báo cho người dùng bên ngoài).
-              </label>
             </div>
           </div>
         </div>
@@ -93,7 +144,11 @@ export default function Settings() {
               ✓ Đã lưu cấu hình thành công!
             </span>
           )}
-          <button type="button" className={styles.cancelBtn}>
+          <button 
+            type="button" 
+            className={styles.cancelBtn}
+            onClick={() => window.location.reload()}
+          >
             Hủy thay đổi
           </button>
           <button type="submit" className={styles.saveBtn}>

@@ -1,15 +1,52 @@
 'use client';
 
-import React from 'react';
-import { BarChart3, TrendingUp, Cpu, Server, Globe } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Cpu, Server, Globe, Loader2 } from 'lucide-react';
 import styles from './page.module.css';
+import { api } from '@/utils/api';
+
+interface SystemMetrics {
+  totalMovies: number;
+  totalUsers: number;
+  cpuLoad: number;
+  memoryUsagePercent: number;
+  memoryTotalMb: number;
+  memoryUsedMb: number;
+  uptime: string;
+}
 
 export default function Analytics() {
+  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchMetrics = async (isInitial = false) => {
+    if (isInitial) setLoading(true);
+    try {
+      const res = await api.get<SystemMetrics>('/system/metrics');
+      setMetrics(res.result);
+    } catch (err: any) {
+      setError(err.message || 'Không thể tải thông số phân tích.');
+    } finally {
+      if (isInitial) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics(true);
+    
+    // Auto-update metrics every 5 seconds
+    const interval = setInterval(() => {
+      fetchMetrics(false);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const performanceStats = [
-    { name: 'Thời gian phản hồi API (trung bình)', value: 124, unit: 'ms', percent: 85, color: 'var(--accent)' },
-    { name: 'Tải CPU máy chủ', value: 42, unit: '%', percent: 42, color: '#f59e0b' },
-    { name: 'Sử dụng bộ nhớ RAM', value: 68, unit: '%', percent: 68, color: '#3b82f6' },
-    { name: 'Băng thông sử dụng', value: 72, unit: 'TB', percent: 72, color: '#ef4444' },
+    { name: 'Tải CPU máy chủ', value: metrics?.cpuLoad || 0, unit: '%', percent: metrics?.cpuLoad || 0, color: '#f59e0b' },
+    { name: 'Sử dụng bộ nhớ RAM', value: metrics?.memoryUsagePercent || 0, unit: '%', percent: metrics?.memoryUsagePercent || 0, color: '#3b82f6' },
+    { name: 'RAM Đã dùng / Tổng RAM', value: `${metrics?.memoryUsedMb || 0} MB / ${metrics?.memoryTotalMb || 0} MB`, unit: '', percent: metrics?.memoryUsagePercent || 0, color: 'var(--accent)' },
   ];
 
   const browserStats = [
@@ -28,6 +65,14 @@ export default function Analytics() {
     { label: 'Khác', value: '4.9%' },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] w-full items-center justify-center">
+        <Loader2 className="animate-spin text-primary-container" size={32} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.pageContainer}>
       <div className={styles.titleGroup}>
@@ -35,12 +80,18 @@ export default function Analytics() {
         <p>Báo cáo hiệu năng và thông số kỹ thuật chi tiết của hệ thống máy chủ và lưu lượng truy cập.</p>
       </div>
 
+      {error && (
+        <div style={{ color: '#ffb4ab', backgroundColor: 'rgba(255, 180, 171, 0.1)', border: '1px solid rgba(255, 180, 171, 0.2)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem' }}>
+          {error}
+        </div>
+      )}
+
       <div className={styles.analyticsGrid}>
         {/* Performance metrics */}
         <div className={styles.card}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
             <Cpu size={20} style={{ color: 'var(--accent)' }} />
-            <h2 className={styles.cardTitle}>Hiệu Năng Máy Chủ</h2>
+            <h2 className={styles.cardTitle}>Hiệu Năng Máy Chủ (Tự động cập nhật mỗi 5s)</h2>
           </div>
           
           <div className={styles.performanceList}>
@@ -78,11 +129,15 @@ export default function Analytics() {
             </div>
             <div className={styles.statRow}>
               <span className={styles.statLabel}>Thời gian uptime</span>
-              <span className={styles.statValue}>15 ngày 4 giờ 22 phút</span>
+              <span className={styles.statValue}>{metrics?.uptime || 'Đang tải...'}</span>
             </div>
             <div className={styles.statRow}>
-              <span className={styles.statLabel}>Phiên bản node</span>
-              <span className={styles.statValue}>v20.11.0</span>
+              <span className={styles.statLabel}>Phiên bản JDK</span>
+              <span className={styles.statValue}>v21 (LTS)</span>
+            </div>
+            <div className={styles.statRow}>
+              <span className={styles.statLabel}>Phiên bản Spring Boot</span>
+              <span className={styles.statValue}>v4.0.6</span>
             </div>
             <div className={styles.statRow}>
               <span className={styles.statLabel}>Phiên bản Next.js</span>
@@ -90,7 +145,7 @@ export default function Analytics() {
             </div>
             <div className={styles.statRow}>
               <span className={styles.statLabel}>Môi trường triển khai</span>
-              <span className={styles.statValue}>Production (Vercel)</span>
+              <span className={styles.statValue}>Development / Localhost</span>
             </div>
           </div>
         </div>

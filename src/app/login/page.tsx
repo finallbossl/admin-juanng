@@ -12,6 +12,7 @@ import {
   Zap, 
   Loader2 
 } from 'lucide-react';
+import { api } from '@/utils/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Parallax coordinates
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
@@ -36,15 +38,43 @@ export default function LoginPage() {
     };
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate API Authorization
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // 1. Call login endpoint
+      const loginRes = await api.post<{ accessToken: string; username: string }>('/auth/login', {
+        email,
+        password
+      });
+
+      const token = loginRes.result.accessToken;
+      
+      // Save token temporarily to make the next request
+      localStorage.setItem('token', token);
+
+      // 2. Call my-info endpoint to verify role
+      const infoRes = await api.get<{ roles: string[] }>('/users/my-info');
+      const roles = infoRes.result.roles || [];
+      const isAdmin = roles.includes('ADMIN') || roles.includes('ROLE_ADMIN');
+
+      if (!isAdmin) {
+        localStorage.removeItem('token');
+        setError('Tài khoản này không có quyền quản trị viên.');
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Save details and redirect
+      localStorage.setItem('user', JSON.stringify(infoRes.result));
       window.location.href = '/';
-    }, 1800);
+    } catch (err: any) {
+      localStorage.removeItem('token');
+      setError(err.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -113,7 +143,7 @@ export default function LoginPage() {
             </div>
 
             {/* Branding Section */}
-            <div className="mb-12 z-10">
+            <div className="mb-8 z-10">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-[#e50914] rounded flex items-center justify-center">
                   <Film className="text-white w-6 h-6" />
@@ -126,6 +156,12 @@ export default function LoginPage() {
                 Executive Management
               </p>
             </div>
+
+            {error && (
+              <div className="mb-6 p-4 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold z-10">
+                {error}
+              </div>
+            )}
 
             {/* Form Section */}
             <form className="space-y-8 z-10" onSubmit={handleLogin}>
