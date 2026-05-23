@@ -1,7 +1,7 @@
 # Login Page Overrides
 
 > **PROJECT:** CineAdmin
-> **Generated:** 2026-05-21 15:27:10
+> **Generated:** 2026-05-23 14:11:34
 > **Page Type:** Dashboard / Data View
 
 > ⚠️ **IMPORTANT:** Rules in this file **override** the Master file (`design-system/MASTER.md`).
@@ -43,5 +43,5 @@
 
 ## Recommendations
 
-- Effects: transform: translateY(scroll), position: fixed/sticky, perspective: 1px, scroll-triggered animations
+- Effects: Minimal glow (text-shadow: 0 0 10px), dark-to-light transitions, low white emission, high readability, visible focus
 - CTA Placement: Floating Sticky CTA or End of Horizontal Track
