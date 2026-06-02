@@ -6,13 +6,20 @@ import {
   Plus, 
   Edit2, 
   Trash2, 
-  X, 
-  ShieldCheck,
-  Check,
-  Loader2
+  Check
 } from 'lucide-react';
-import styles from './page.module.css';
 import { api } from '@/utils/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle
+} from '@/components/ui/sheet';
 
 interface User {
   id: string | number;
@@ -130,44 +137,89 @@ export default function Users() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  return (
-    <div className={styles.pageContainer}>
-      {/* Title section */}
-      <div className={styles.headerSection}>
-        <div className={styles.titleGroup}>
-          <h1>Quản Lý Tài Khoản</h1>
-          <p>Hiển thị danh sách người dùng toàn hệ thống và phân quyền truy cập.</p>
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64 bg-white/5" />
+            <Skeleton className="h-4 w-96 bg-white/5" />
+          </div>
+          <Skeleton className="h-10 w-36 bg-white/5 rounded-lg" />
         </div>
-        <button className={styles.createBtn} onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <Skeleton className="h-10 w-80 bg-white/5 rounded-full" />
+          <div className="flex gap-4">
+            <Skeleton className="h-10 w-36 bg-white/5 rounded-md" />
+            <Skeleton className="h-10 w-36 bg-white/5 rounded-md" />
+          </div>
+        </div>
+        <Card className="glass-panel border-none shadow-none p-6 space-y-4">
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex justify-between items-center py-2 border-b border-white/5">
+                <div className="flex gap-3 items-center flex-1">
+                  <Skeleton className="h-10 w-10 bg-white/5 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-1/4 bg-white/5" />
+                    <Skeleton className="h-3 w-1/3 bg-white/5" />
+                  </div>
+                </div>
+                <div className="flex gap-16 items-center">
+                  <Skeleton className="h-6 w-20 bg-white/5 rounded-full" />
+                  <Skeleton className="h-4 w-24 bg-white/5" />
+                  <Skeleton className="h-6 w-16 bg-white/5 rounded-full" />
+                  <Skeleton className="h-8 w-16 bg-white/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Title section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="space-y-1">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface">Quản Lý Tài Khoản</h1>
+          <p className="text-secondary text-body-md">Hiển thị danh sách người dùng toàn hệ thống và phân quyền truy cập.</p>
+        </div>
+        <Button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-primary-container hover:bg-primary-container/90 text-white cursor-pointer font-semibold shadow-md shadow-primary-container/20"
+        >
+          <Plus size={18} className="mr-1.5" />
           Thêm Tài Khoản
-        </button>
+        </Button>
       </div>
 
       {error && (
-        <div style={{ color: '#ffb4ab', backgroundColor: 'rgba(255, 180, 171, 0.1)', border: '1px solid rgba(255, 180, 171, 0.2)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem' }}>
+        <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-lg text-sm">
           {error}
         </div>
       )}
 
       {/* Filter and Search Bar */}
-      <div className={styles.filterBar}>
-        <div className={styles.searchWrapper}>
-          <Search className={styles.searchIcon} />
-          <input 
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <div className="relative flex-1 max-w-sm w-full">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
+          <Input 
             type="text" 
             placeholder="Tìm theo tên, email..." 
-            className={styles.searchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-surface-container text-on-surface border-none rounded-full pl-10 pr-4 h-10 text-body-md focus-visible:ring-2 focus-visible:ring-primary-container w-full transition-all focus-visible:outline-none"
           />
         </div>
 
-        <div className={styles.filterGroup}>
+        <div className="flex flex-wrap gap-4 w-full md:w-auto">
           <select 
-            className={styles.selectInput}
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
+            className="bg-surface-container text-on-surface border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container outline-none cursor-pointer"
           >
             <option value="All">Tất cả Vai trò</option>
             <option value="Super Admin">Super Admin</option>
@@ -176,9 +228,9 @@ export default function Users() {
           </select>
 
           <select 
-            className={styles.selectInput}
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-surface-container text-on-surface border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container outline-none cursor-pointer"
           >
             <option value="All">Tất cả Trạng thái</option>
             <option value="active">Hoạt động</option>
@@ -188,169 +240,173 @@ export default function Users() {
       </div>
 
       {/* Users Table Card */}
-      <div className={styles.tableCard}>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+      <Card className="glass-panel border-none shadow-none">
+        <CardContent className="p-0 overflow-x-auto">
+          <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr>
-                <th className={styles.th}>Họ Tên</th>
-                <th className={styles.th}>Vai Trò</th>
-                <th className={styles.th}>Ngày Tham Gia</th>
-                <th className={styles.th}>Trạng Thái</th>
-                <th className={styles.th} style={{ textAlign: 'right' }}>Hành Động</th>
+              <tr className="border-bottom border-white/5">
+                <th className="p-4 text-secondary font-semibold">Họ Tên</th>
+                <th className="p-4 text-secondary font-semibold">Vai Trò</th>
+                <th className="p-4 text-secondary font-semibold">Ngày Tham Gia</th>
+                <th className="p-4 text-secondary font-semibold">Trạng Thái</th>
+                <th className="p-4 text-secondary font-semibold text-right">Hành Động</th>
               </tr>
             </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td className={styles.td} colSpan={5} style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                      <Loader2 className="animate-spin" size={18} />
-                      Đang tải danh sách người dùng...
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredUsers.length > 0 ? (
+            <tbody className="divide-y divide-white/5">
+              {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className={styles.tr}>
-                    <td className={styles.td}>
-                      <div className={styles.userCell}>
-                        <div className={styles.avatar}>
-                          {user.name.charAt(0)}
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span className={styles.userName}>{user.name}</span>
-                          <span className={styles.userEmail}>{user.email}</span>
+                  <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-10 h-10 border border-white/10 flex-shrink-0">
+                          <AvatarFallback className="bg-gradient-to-tr from-primary-container to-on-primary-fixed-variant text-white font-bold">
+                            {user.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-semibold text-on-surface truncate">{user.name}</span>
+                          <span className="text-xs text-secondary truncate">{user.email}</span>
                         </div>
                       </div>
                     </td>
-                    <td className={styles.td}>
-                      <span className={`${styles.roleBadge} ${
-                        user.role === 'Super Admin' ? styles.roleAdmin : ''
-                      }`}>
+                    <td className="p-4">
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold 
+                        ${user.role === 'Super Admin' 
+                          ? 'bg-primary-container/20 text-primary-container' 
+                          : 'bg-white/5 text-secondary'
+                        }
+                      `}>
                         {user.role}
                       </span>
                     </td>
-                    <td className={styles.td} style={{ color: 'var(--text-secondary)' }}>
-                      {user.joinedDate}
-                    </td>
-                    <td className={styles.td}>
-                      <div className={styles.statusDot}>
-                        <span className={user.status === 'active' ? styles.dotActive : styles.dotInactive} />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                    <td className="p-4 text-secondary">{user.joinedDate}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full 
+                          ${user.status === 'active' ? 'bg-green-500' : 'bg-red-500'}
+                        `} />
+                        <span className="text-xs text-secondary">
                           {user.status === 'active' ? 'Hoạt động' : 'Tạm khóa'}
                         </span>
                       </div>
                     </td>
-                    <td className={styles.td} style={{ textAlign: 'right' }}>
-                      <div className={styles.actionCell} style={{ justifyContent: 'flex-end' }}>
-                        <button className={styles.actionBtn} title="Chỉnh sửa">
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-secondary hover:text-white cursor-pointer h-8 w-8 hover:bg-white/5" 
+                          title="Chỉnh sửa"
+                        >
                           <Edit2 size={15} />
-                        </button>
-                        <button 
-                          className={`${styles.actionBtn} ${user.status === 'active' ? styles.actionBtnDelete : ''}`} 
-                          title={user.status === 'active' ? 'Tạm khóa' : 'Mở khóa'}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
                           onClick={() => handleToggleStatus(user.id, user.status)}
+                          className={`cursor-pointer h-8 w-8 hover:bg-white/5
+                            ${user.status === 'active' ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}
+                          `}
+                          title={user.status === 'active' ? 'Tạm khóa' : 'Mở khóa'}
                         >
                           <Trash2 size={15} />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td className={styles.td} colSpan={5} style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-muted)' }}>
+                  <td colSpan={5} className="text-center p-8 text-secondary">
                     Không tìm thấy tài khoản phù hợp.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Create User Modal */}
-      {isModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h2>Thêm Tài Khoản Mới</h2>
-              <button className={styles.closeBtn} onClick={() => setIsModalOpen(false)}>
-                <X size={18} />
-              </button>
+      {/* Create User Side Sheet */}
+      <Sheet open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <SheetContent className="glass-panel border-white/5 text-on-background sm:max-w-md">
+          <SheetHeader className="border-b border-white/5 pb-4 mb-4">
+            <SheetTitle className="font-headline-sm text-headline-sm text-on-surface">Thêm Tài Khoản Mới</SheetTitle>
+          </SheetHeader>
+          
+          <form onSubmit={handleCreateUser} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="fullName" className="text-xs font-semibold text-secondary">Họ và Tên</label>
+              <Input 
+                type="text" 
+                id="fullName" 
+                placeholder="Nhập họ và tên..."
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                required
+                className="bg-surface border-white/5 text-on-surface focus-visible:ring-primary-container"
+              />
             </div>
-            
-            <form onSubmit={handleCreateUser}>
-              <div className={styles.modalBody}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="fullName">Họ và Tên</label>
-                  <input 
-                    type="text" 
-                    id="fullName" 
-                    className={styles.textInput}
-                    placeholder="Nhập họ và tên..."
-                    value={newUserName}
-                    onChange={(e) => setNewUserName(e.target.value)}
-                    required
-                  />
-                </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="email">Email</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    className={styles.textInput}
-                    placeholder="Nhập email..."
-                    value={newUserEmail}
-                    onChange={(e) => setNewUserEmail(e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="text-xs font-semibold text-secondary">Email</label>
+              <Input 
+                type="email" 
+                id="email" 
+                placeholder="Nhập email..."
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                required
+                className="bg-surface border-white/5 text-on-surface focus-visible:ring-primary-container"
+              />
+            </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="role">Vai Trò</label>
-                  <select 
-                    id="role" 
-                    className={styles.selectInput}
-                    value={newUserRole}
-                    onChange={(e) => setNewUserRole(e.target.value)}
-                    style={{ width: '100%' }}
-                  >
-                    <option value="User">User</option>
-                    <option value="Editor">Editor</option>
-                    <option value="Super Admin">Super Admin</option>
-                  </select>
-                </div>
+            <div className="space-y-1.5">
+              <label htmlFor="role" className="text-xs font-semibold text-secondary">Vai Trò</label>
+              <select 
+                id="role" 
+                value={newUserRole}
+                onChange={(e) => setNewUserRole(e.target.value)}
+                className="w-full bg-surface-container text-on-surface border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container outline-none cursor-pointer"
+              >
+                <option value="User">User</option>
+                <option value="Editor">Editor</option>
+                <option value="Super Admin">Super Admin</option>
+              </select>
+            </div>
 
-                <div className={styles.formGroup}>
-                  <label htmlFor="status">Trạng Thái</label>
-                  <select 
-                    id="status" 
-                    className={styles.selectInput}
-                    value={newUserStatus}
-                    onChange={(e) => setNewUserStatus(e.target.value as 'active' | 'inactive')}
-                    style={{ width: '100%' }}
-                  >
-                    <option value="active">Hoạt động</option>
-                    <option value="inactive">Tạm khóa</option>
-                  </select>
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <label htmlFor="status" className="text-xs font-semibold text-secondary">Trạng Thái</label>
+              <select 
+                id="status" 
+                value={newUserStatus}
+                onChange={(e) => setNewUserStatus(e.target.value as 'active' | 'inactive')}
+                className="w-full bg-surface-container text-on-surface border-none rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-container outline-none cursor-pointer"
+              >
+                <option value="active">Hoạt động</option>
+                <option value="inactive">Tạm khóa</option>
+              </select>
+            </div>
 
-              <div className={styles.modalFooter}>
-                <button type="button" className={styles.cancelBtn} onClick={() => setIsModalOpen(false)}>
-                  Hủy
-                </button>
-                <button type="submit" className={styles.saveBtn}>
-                  Lưu Lại
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="border-white/10 text-secondary hover:bg-white/5 hover:text-white cursor-pointer"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Hủy
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-primary-container hover:bg-primary-container/90 text-white cursor-pointer font-semibold shadow-md shadow-primary-container/20"
+              >
+                Lưu Lại
+              </Button>
+            </div>
+          </form>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -15,9 +16,11 @@ export default function Sidebar({ isCollapsed, isOpenMobile, onCloseMobile }: Si
 
   const menuItems = [
     { label: 'Overview', href: '/', icon: 'dashboard' },
-    { label: 'Movies', href: '/products', icon: 'movie' },
-    { label: 'Users', href: '/users', icon: 'group' },
-    { label: 'Analytics', href: '/analytics', icon: 'analytics' }
+    { label: 'Quản lý Phim', href: '/products', icon: 'movie' },
+    { label: 'Nguồn Phim', href: '/settings', icon: 'database' },
+    { label: 'Công cụ Crawler', href: '/products', icon: 'precision_manufacturing' },
+    { label: 'Người dùng', href: '/users', icon: 'group' },
+    { label: 'Báo cáo', href: '/analytics', icon: 'analytics' }
   ];
 
   return (
@@ -54,7 +57,7 @@ export default function Sidebar({ isCollapsed, isOpenMobile, onCloseMobile }: Si
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-4 space-y-2 mt-6">
+        <nav className="flex-1 px-4 space-y-1 mt-2">
           {menuItems.map((item, idx) => {
             const isActive = pathname === item.href;
             return (
@@ -64,8 +67,8 @@ export default function Sidebar({ isCollapsed, isOpenMobile, onCloseMobile }: Si
                 onClick={onCloseMobile}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer group
                   ${isActive 
-                    ? 'bg-primary-container text-on-primary-container font-bold shadow-md shadow-primary-container/10' 
-                    : 'text-secondary hover:bg-white/5 hover:text-on-surface'
+                    ? 'bg-primary-container text-white font-bold' 
+                    : 'text-secondary hover:bg-white/5 hover:text-white'
                   }
                   ${isCollapsed ? 'justify-center' : ''}
                 `}
@@ -81,14 +84,16 @@ export default function Sidebar({ isCollapsed, isOpenMobile, onCloseMobile }: Si
         {/* User Profile Container */}
         <div className="p-4 mt-auto">
           <div className={`flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-white/5 ${isCollapsed ? 'justify-center' : ''}`}>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary-container to-on-primary-fixed-variant flex items-center justify-center text-white overflow-hidden flex-shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
+            <Avatar className="w-10 h-10 border border-white/10 flex-shrink-0">
+              <AvatarImage 
                 alt="Admin Profile" 
-                className="w-full h-full object-cover" 
+                className="object-cover" 
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEyB_PvVRzXN4yiDitzp1PGOyIyf6LUr5hOqgntVo-SExz7qZ0lnlNYI5BDXnf7_EIS8bLZFPL9zaUKc8Q3eQPX0Yz5toTlRe6l3eTZTwabzhthg64CTqHzmyfMyf_6Uwe1qFKv9fMkXS_8ZieHXlpo2rIe2EqDYjbq1kjwEv4eP3u9RJQPmG1I6hDJMNa2f4VKYWuRAXmz9wKiMx8ntUwp4f7CKb4_Gl8dXTyak1rnLc66j4Cw19jP4NwOm1v4plHSeqjOfOnLVM"
               />
-            </div>
+              <AvatarFallback className="bg-gradient-to-tr from-primary-container to-on-primary-fixed-variant text-white font-bold">
+                AD
+              </AvatarFallback>
+            </Avatar>
             
             {!isCollapsed && (
               <>

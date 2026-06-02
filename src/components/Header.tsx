@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface HeaderProps {
   isSidebarCollapsed: boolean;
@@ -61,22 +63,26 @@ export default function Header({ isSidebarCollapsed, onToggleSidebar, onToggleMo
       <div className="flex justify-between items-center px-6 h-16">
         <div className="flex items-center gap-4">
           {/* Toggle sidebar button for mobile */}
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onToggleMobileSidebar}
             className="md:hidden text-primary-container p-2 hover:bg-white/5 rounded-full cursor-pointer flex items-center justify-center transition-colors"
             title="Menu"
           >
             <span className="material-symbols-outlined">menu</span>
-          </button>
+          </Button>
           
           {/* Toggle sidebar button for desktop */}
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={onToggleSidebar}
             className="hidden md:flex text-primary-container p-2 hover:bg-white/5 rounded-full cursor-pointer items-center justify-center transition-colors"
             title="Toggle Sidebar"
           >
             <span className="material-symbols-outlined">menu</span>
-          </button>
+          </Button>
 
           <h2 className="font-headline-sm text-headline-sm text-on-surface hidden sm:block">
             {getPageTitle()}
@@ -89,32 +95,36 @@ export default function Header({ isSidebarCollapsed, onToggleSidebar, onToggleMo
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-secondary text-lg">
               search
             </span>
-            <input 
+            <Input 
               type="text" 
               placeholder="Search data..." 
-              className="bg-surface-container text-on-surface border-none rounded-full pl-10 pr-4 h-10 text-body-md focus:ring-2 focus:ring-primary-container w-64 transition-all focus:outline-none"
+              className="bg-surface-container text-on-surface border-none rounded-full pl-10 pr-4 h-10 text-body-md focus-visible:ring-2 focus-visible:ring-primary-container w-64 transition-all focus-visible:outline-none"
             />
           </div>
 
           {/* Theme toggle */}
-          <button 
+          <Button 
+            variant="ghost"
+            size="icon"
             onClick={toggleTheme} 
-            className="text-secondary hover:text-on-surface p-2 rounded-full hover:bg-white/5 cursor-pointer flex items-center justify-center transition-colors"
+            className="text-secondary hover:text-on-surface rounded-full hover:bg-white/5 cursor-pointer flex items-center justify-center transition-colors"
             title={theme === 'dark' ? 'Chuyển sang chế độ Sáng' : 'Chuyển sang chế độ Tối'}
           >
             <span className="material-symbols-outlined">
               {theme === 'dark' ? 'light_mode' : 'dark_mode'}
             </span>
-          </button>
+          </Button>
 
           {/* Notifications */}
-          <button 
-            className="text-primary-container hover:opacity-80 active:scale-95 transition-transform p-2 rounded-full hover:bg-white/5 relative cursor-pointer flex items-center justify-center"
+          <Button 
+            variant="ghost"
+            size="icon"
+            className="text-primary-container hover:opacity-80 active:scale-95 transition-transform rounded-full hover:bg-white/5 relative cursor-pointer flex items-center justify-center"
             title="Notifications"
           >
             <span className="material-symbols-outlined">notifications</span>
             <span className="absolute top-2 right-2 w-2 h-2 bg-primary-container rounded-full border border-surface"></span>
-          </button>
+          </Button>
         </div>
       </div>
     </header>

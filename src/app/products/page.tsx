@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Film, Trash2, Shield, ShieldAlert, Loader2, Search } from 'lucide-react';
-import styles from '../analytics/page.module.css'; // Re-use general card styles
+import { Film, Trash2, Shield, ShieldAlert, Search } from 'lucide-react';
 import { api } from '@/utils/api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Movie {
   id: string;
@@ -83,138 +86,138 @@ export default function Products() {
     m.originName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-64 bg-white/5" />
+          <Skeleton className="h-4 w-96 bg-white/5" />
+        </div>
+        <div className="flex gap-4 max-w-sm">
+          <Skeleton className="h-10 w-full bg-white/5 rounded-full" />
+        </div>
+        <Card className="glass-panel border-none shadow-none p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-5 bg-white/5 rounded-full" />
+            <Skeleton className="h-5 w-40 bg-white/5" />
+          </div>
+          <div className="space-y-3 pt-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex justify-between items-center py-2 border-b border-white/5">
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-1/3 bg-white/5" />
+                  <Skeleton className="h-3 w-1/4 bg-white/5" />
+                </div>
+                <div className="flex gap-12 items-center">
+                  <Skeleton className="h-4 w-16 bg-white/5" />
+                  <Skeleton className="h-6 w-20 bg-white/5 rounded-full" />
+                  <Skeleton className="h-8 w-8 bg-white/5 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.titleGroup}>
-        <h1>Quản Lý Danh Sách Phim</h1>
-        <p>Xem danh sách phim hiện có trong cơ sở dữ liệu, quản lý quyền VIP phim và xóa phim.</p>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="font-headline-lg text-headline-lg text-on-surface">Quản Lý Danh Sách Phim</h1>
+        <p className="text-secondary text-body-md">Xem danh sách phim hiện có trong cơ sở dữ liệu, quản lý quyền VIP phim và xóa phim.</p>
       </div>
 
       {error && (
-        <div style={{ color: '#ffb4ab', backgroundColor: 'rgba(255, 180, 171, 0.1)', border: '1px solid rgba(255, 180, 171, 0.2)', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem' }}>
+        <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-4 py-3 rounded-lg text-sm">
           {error}
         </div>
       )}
 
       {/* Search Bar */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input 
+      <div className="flex gap-4 items-center">
+        <div className="relative flex-1 max-w-sm">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
+          <Input 
             type="text" 
             placeholder="Tìm phim theo tên..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '10px 12px 10px 40px', 
-              borderRadius: '9999px', 
-              border: '1px solid var(--border-color)', 
-              backgroundColor: 'var(--bg-secondary)', 
-              color: 'var(--text-primary)',
-              outline: 'none'
-            }}
+            className="bg-surface-container text-on-surface border-none rounded-full pl-10 pr-4 h-10 text-body-md focus-visible:ring-2 focus-visible:ring-primary-container w-full transition-all focus-visible:outline-none"
           />
         </div>
       </div>
 
-      <div className={styles.analyticsGrid} style={{ gridTemplateColumns: '1fr' }}>
-        <div className={styles.card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
-            <Film size={20} style={{ color: 'var(--accent)' }} />
-            <h2 className={styles.cardTitle}>Danh Sách Phim</h2>
-          </div>
+      <Card className="glass-panel border-none shadow-none">
+        <CardHeader className="p-6 pb-4 border-b border-white/5 flex flex-row items-center gap-2 space-y-0">
+          <Film className="h-5 w-5 text-primary" />
+          <CardTitle className="font-headline-sm text-headline-sm">Danh Sách Phim</CardTitle>
+        </CardHeader>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ padding: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Tên Phim</th>
-                  <th style={{ padding: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Định Dạng</th>
-                  <th style={{ padding: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Chất Lượng</th>
-                  <th style={{ padding: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Năm</th>
-                  <th style={{ padding: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Phân Hạng VIP</th>
-                  <th style={{ padding: '12px', color: 'var(--text-secondary)', fontWeight: 600, textAlign: 'right' }}>Hành Động</th>
+        <CardContent className="p-0 overflow-x-auto">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-bottom border-white/5">
+                <th className="p-4 text-secondary font-semibold">Tên Phim</th>
+                <th className="p-4 text-secondary font-semibold">Định Dạng</th>
+                <th className="p-4 text-secondary font-semibold">Chất Lượng</th>
+                <th className="p-4 text-secondary font-semibold">Năm</th>
+                <th className="p-4 text-secondary font-semibold">Phân Hạng VIP</th>
+                <th className="p-4 text-secondary font-semibold text-right">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {filteredMovies.length > 0 ? (
+                filteredMovies.map((movie) => (
+                  <tr key={movie.id} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4">
+                      <div className="font-semibold text-on-surface">{movie.name}</div>
+                      <div className="text-xs text-secondary">{movie.originName}</div>
+                    </td>
+                    <td className="p-4 text-secondary">{movie.type}</td>
+                    <td className="p-4">
+                      <span className="bg-white/5 text-on-surface px-2 py-0.5 rounded text-xs font-semibold">{movie.quality}</span>
+                    </td>
+                    <td className="p-4 text-secondary">{movie.year}</td>
+                    <td className="p-4">
+                      <Button 
+                        variant="ghost"
+                        onClick={() => handleTogglePremium(movie.id, movie.premiumOnly)}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all h-auto
+                          ${movie.premiumOnly 
+                            ? 'bg-primary-container text-white hover:bg-primary-container/90' 
+                            : 'bg-white/5 text-secondary hover:bg-white/10 hover:text-white'
+                          }
+                        `}
+                      >
+                        {movie.premiumOnly ? <ShieldAlert size={12} /> : <Shield size={12} />}
+                        {movie.premiumOnly ? 'VIP/Premium' : 'Miễn Phí'}
+                      </Button>
+                    </td>
+                    <td className="p-4 text-right">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleDeleteMovie(movie.id)}
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 cursor-pointer h-8 w-8"
+                        title="Xóa phim"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center p-8 text-secondary">
+                    Không tìm thấy bộ phim nào phù hợp.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                        <Loader2 className="animate-spin" size={18} />
-                        Đang tải danh sách phim...
-                      </div>
-                    </td>
-                  </tr>
-                ) : filteredMovies.length > 0 ? (
-                  filteredMovies.map((movie) => (
-                    <tr key={movie.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
-                      <td style={{ padding: '16px 12px' }}>
-                        <div style={{ fontWeight: 600 }}>{movie.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{movie.originName}</div>
-                      </td>
-                      <td style={{ padding: '16px 12px', color: 'var(--text-secondary)' }}>{movie.type}</td>
-                      <td style={{ padding: '16px 12px' }}>
-                        <span style={{ backgroundColor: 'var(--bg-hover)', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>{movie.quality}</span>
-                      </td>
-                      <td style={{ padding: '16px 12px', color: 'var(--text-secondary)' }}>{movie.year}</td>
-                      <td style={{ padding: '16px 12px' }}>
-                        <button 
-                          onClick={() => handleTogglePremium(movie.id, movie.premiumOnly)}
-                          style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '6px', 
-                            padding: '4px 10px', 
-                            borderRadius: '9999px', 
-                            fontSize: '0.75rem', 
-                            fontWeight: 600, 
-                            cursor: 'pointer',
-                            border: 'none',
-                            color: movie.premiumOnly ? '#fff' : 'var(--text-secondary)',
-                            backgroundColor: movie.premiumOnly ? 'var(--accent)' : 'var(--bg-hover)',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          {movie.premiumOnly ? <ShieldAlert size={12} /> : <Shield size={12} />}
-                          {movie.premiumOnly ? 'VIP/Premium' : 'Miễn Phí'}
-                        </button>
-                      </td>
-                      <td style={{ padding: '16px 12px', textAlign: 'right' }}>
-                        <button 
-                          onClick={() => handleDeleteMovie(movie.id)}
-                          style={{ 
-                            color: 'var(--danger)', 
-                            backgroundColor: 'transparent', 
-                            border: 'none', 
-                            cursor: 'pointer', 
-                            padding: '6px', 
-                            borderRadius: '4px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          className="hover:bg-red-500/10"
-                          title="Xóa phim"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                      Không tìm thấy bộ phim nào phù hợp.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

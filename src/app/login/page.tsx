@@ -18,6 +18,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { api } from '@/utils/api';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const FEATURE_ITEMS = [
   { icon: Film, label: 'Quản lý phim', desc: '10,000+ tựa phim' },
@@ -192,7 +194,7 @@ export default function LoginPage() {
                 <span className="login-field__icon login-field__icon--left">
                   <Mail size={16} />
                 </span>
-                <input
+                <Input
                   ref={emailRef}
                   autoFocus
                   id="email"
@@ -204,7 +206,7 @@ export default function LoginPage() {
                   onFocus={() => setActiveInput('email')}
                   onBlur={() => setActiveInput(null)}
                   placeholder="admin@cineadmin.vn"
-                  className="login-field__input"
+                  className="login-field__input border-none"
                 />
                 {email && (
                   <span className="login-field__icon login-field__icon--right login-field__icon--check">
@@ -228,7 +230,7 @@ export default function LoginPage() {
                 <span className="login-field__icon login-field__icon--left">
                   <Lock size={16} />
                 </span>
-                <input
+                <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
@@ -238,7 +240,7 @@ export default function LoginPage() {
                   onFocus={() => setActiveInput('password')}
                   onBlur={() => setActiveInput(null)}
                   placeholder="••••••••••"
-                  className="login-field__input"
+                  className="login-field__input border-none"
                 />
                 <button
                   type="button"
@@ -267,16 +269,16 @@ export default function LoginPage() {
             </div>
 
             {/* Submit button */}
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="login-submit"
+              className="login-submit h-auto w-full cursor-pointer flex justify-center items-center"
               aria-busy={isLoading}
             >
               <span className="login-submit__shine" aria-hidden="true" />
               {isLoading ? (
                 <>
-                  <Loader2 size={18} className="login-submit__spinner" />
+                  <Loader2 size={18} className="login-submit__spinner animate-spin" />
                   <span>Đang xác thực…</span>
                 </>
               ) : (
@@ -285,7 +287,7 @@ export default function LoginPage() {
                   <ArrowRight size={18} className="login-submit__arrow" />
                 </>
               )}
-            </button>
+            </Button>
 
           </form>
 
