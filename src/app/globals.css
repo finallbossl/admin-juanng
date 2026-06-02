@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -319,6 +319,72 @@ input, select, textarea, button {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+@utility font-headline-md {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-headline-md {
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+@utility font-headline-lg {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-headline-lg {
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+@utility font-label-sm {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-label-sm {
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 500;
+}
+
+@utility font-label-lg {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-label-lg {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+@utility font-body-md {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-body-md {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+@utility font-headline-sm {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-headline-sm {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+@utility font-body-lg {
+  font-family: 'Inter', sans-serif;
+}
+@utility text-body-lg {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
 @utility sparkline-container {
   height: 40px;
   width: 100px;
@@ -390,23 +456,8 @@ input, select, textarea, button {
   letter-spacing: 0.2em;
 }
 
-@utility material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: 'liga';
-  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .scanline {

@@ -18,8 +18,7 @@ export default function Header({ isSidebarCollapsed, onToggleSidebar, onToggleMo
   // Load theme preference on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-    const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    const initialTheme = savedTheme || (systemPrefersLight ? 'light' : 'dark');
+    const initialTheme = savedTheme || 'dark';
     
     setTheme(initialTheme);
     document.documentElement.setAttribute('data-theme', initialTheme);
