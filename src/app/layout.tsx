@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: 'AdminPro - Premium Admin Dashboard',
-  description: 'Giao diện quản trị Admin Dashboard cao cấp xây dựng bằng Next.js & CSS Modules',
+  title: 'CineAdmin — Cinematic Admin Dashboard',
+  description: 'Premium cinematic admin dashboard for your streaming platform. Manage movies, users, analytics and server performance in real-time.',
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={cn("dark font-sans", geist.variable)}>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body suppressHydrationWarning>
         <DashboardLayout>{children}</DashboardLayout>

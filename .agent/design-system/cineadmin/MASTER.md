@@ -7,8 +7,8 @@
 ---
 
 **Project:** CineAdmin
-**Generated:** 2026-06-02 15:00:05
-**Category:** Video Streaming/OTT
+**Generated:** 2026-06-02 08:58:18
+**Category:** Financial Dashboard
 
 ---
 
@@ -173,8 +173,8 @@
 
 ## Anti-Patterns (Do NOT Use)
 
-- ❌ Static layout
-- ❌ Slow video player
+- ❌ Light mode default
+- ❌ Slow rendering
 
 ### Additional Forbidden Patterns
 

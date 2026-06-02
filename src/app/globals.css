@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -8,32 +8,57 @@
 :root {
   /* Fonts */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
+  --font-heading: 'Inter', sans-serif;
 
-  /* Color Palette - Dark Mode (Default) */
-  --bg-primary: #131313;
-  --bg-secondary: #1c1b1b;
-  --bg-tertiary: #201f1f;
-  --bg-glass: rgba(30, 30, 30, 0.7);
-  --bg-hover: rgba(255, 255, 255, 0.05);
-  --text-primary: #e5e2e1;
-  --text-secondary: #c8c6c5;
-  --text-muted: #7a7a78;
-  --accent: oklch(0.97 0 0);
-  --accent-glow: rgba(229, 9, 20, 0.15);
-  --accent-hover: #b2070f;
-  --danger: #ffb4ab;
+  /* ════════════════════════════════════════
+     CINEMATIC DARK MODE — Design Tokens
+     ════════════════════════════════════════ */
+
+  /* Backgrounds — OLED Black */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #161616;
+  --bg-surface: #1a1a1a;
+  --bg-glass: rgba(15, 15, 15, 0.75);
+  --bg-glass-card: rgba(18, 18, 18, 0.6);
+  --bg-hover: rgba(255, 255, 255, 0.04);
+
+  /* Text */
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #64748B;
+  --text-dim: #374151;
+
+  /* Cinema Red Accent */
+  --accent: #E50914;
+  --accent-dim: rgba(229, 9, 20, 0.12);
+  --accent-glow: rgba(229, 9, 20, 0.25);
+  --accent-glow-strong: rgba(229, 9, 20, 0.45);
+  --accent-hover: #F51924;
+  --accent-dark: #9B0710;
+
+  /* Status Colors */
+  --success: #22C55E;
+  --success-dim: rgba(34, 197, 94, 0.12);
+  --danger: #EF4444;
   --danger-glow: rgba(239, 68, 68, 0.15);
-  --warning: #f59e0b;
-  --info: #0072d7;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.15);
+  --warning: #F59E0B;
+  --info: #3B82F6;
+  --info-dim: rgba(59, 130, 246, 0.12);
+
+  /* Borders */
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.14);
+  --border-accent: rgba(229, 9, 20, 0.4);
+  --border-accent-glow: rgba(229, 9, 20, 0.2);
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
-  --shadow-premium: 0 0 20px rgba(229, 9, 20, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.7);
+  --shadow-premium: 0 0 0 1px rgba(229, 9, 20, 0.3), 0 8px 32px rgba(229, 9, 20, 0.15);
+  --shadow-card-hover: 0 0 0 1px rgba(229, 9, 20, 0.45), 0 12px 40px rgba(229, 9, 20, 0.18);
 
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -44,6 +69,7 @@
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 
   /* Scrollbar */
@@ -144,23 +170,23 @@ input, select, textarea, button {
   font-family: inherit;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar — Ultra Thin Cinematic */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(229, 9, 20, 0.5);
 }
 
 /* Base Utility Classes */
@@ -178,36 +204,89 @@ input, select, textarea, button {
   background-clip: text;
 }
 
-/* Micro-Animations & Glows */
-@keyframes pulseGlow {
-  0% {
-    box-shadow: 0 0 5px var(--accent-glow);
-  }
-  50% {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
-  }
-  100% {
-    box-shadow: 0 0 5px var(--accent-glow);
-  }
-}
-
-.glow-active {
-  animation: pulseGlow 2s infinite ease-in-out;
-}
+/* ════════════════════════════════════════
+   CINEMATIC ANIMATIONS
+   ════════════════════════════════════════ */
 
 @keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardEntrance {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(16px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
+}
+
+@keyframes shimmerSweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes redGlowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(229, 9, 20, 0.3), 0 0 20px rgba(229, 9, 20, 0.1); }
+  50%       { box-shadow: 0 0 16px rgba(229, 9, 20, 0.6), 0 0 40px rgba(229, 9, 20, 0.2); }
+}
+
+@keyframes liveBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
+
+@keyframes onlinePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
   animation: fadeIn 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.card-entrance {
+  animation: cardEntrance 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stat-number {
+  animation: countUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.glow-active {
+  animation: redGlowPulse 2s ease-in-out infinite;
+}
+
+/* ── Skeleton Shimmer ── */
+.skeleton-cinema {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+}
+.skeleton-cinema::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.055) 50%,
+    transparent 65%
+  );
+  animation: shimmerSweep 1.6s ease-in-out infinite;
 }
 
 .custom-chart-tooltip {
@@ -398,6 +477,97 @@ input, select, textarea, button {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
 }
 
+/* ── Cinematic Glass Card (Dashboard panels) ── */
+@utility glass-card-cinema {
+  background: rgba(14, 14, 14, 0.65);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 200ms ease, box-shadow 250ms ease, transform 200ms ease;
+
+  &:hover {
+    border-color: rgba(229, 9, 20, 0.35);
+    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.25), 0 12px 40px rgba(229, 9, 20, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+/* ── Stat Card (metric cards) ── */
+@utility stat-card {
+  background: rgba(16, 16, 16, 0.8);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+  transition: border-color 200ms ease, box-shadow 250ms ease, transform 200ms ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(229, 9, 20, 0.4);
+    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.3), 0 8px 32px rgba(229, 9, 20, 0.14);
+    transform: translateY(-2px);
+  }
+}
+
+/* ── Section Panel ── */
+@utility cinema-panel {
+  background: rgba(13, 13, 13, 0.7);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Area Chart Gradient (inline SVG) ── */
+@utility area-chart-glow {
+  filter: drop-shadow(0 0 6px rgba(229, 9, 20, 0.5));
+}
+
+/* ── Progress Bar Cinema ── */
+@utility progress-cinema {
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+
+  & > div {
+    height: 100%;
+    border-radius: var(--radius-full);
+    animation: progressFill 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: width 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* ── Live Indicator ── */
+@utility live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #E50914;
+  animation: liveBlink 1.8s ease-in-out infinite;
+}
+
+/* ── Online Status Dot ── */
+@utility online-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22C55E;
+  animation: onlinePulse 2s ease-out infinite;
+}
+
+/* ── Red Accent Line (sidebar/dividers) ── */
+@utility accent-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, rgba(229, 9, 20, 0.6), transparent);
+}
+
 @utility cinematic-bg {
   position: fixed;
   top: 0;
@@ -459,6 +629,16 @@ input, select, textarea, button {
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.25s ease forwards;
+}
+
 
 .scanline {
   position: fixed;
@@ -1308,4 +1488,54 @@ input, select, textarea, button {
   html {
     @apply font-sans;
   }
+}
+
+/* CineAdmin Custom Themes & Layout Patterns */
+.sidebar-bg {
+  background-color: #080808 !important;
+  background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png") !important;
+  background-blend-mode: overlay !important;
+  position: relative;
+  overflow: hidden;
+}
+.sidebar-bg::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle at 50% 0%, rgba(229, 9, 20, 0.08), transparent 50%) !important;
+  pointer-events: none;
+  z-index: 0;
+}
+.nav-item-active {
+  background: rgba(229, 9, 20, 0.12) !important;
+  border-left: 3px solid #e50914 !important;
+  color: #fff !important;
+  transform: scale(1.02);
+}
+.status-pulse {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  position: relative;
+}
+.status-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background-color: #10b981;
+  opacity: 0.4;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(2); opacity: 0; }
+}
+.gear-hover:hover {
+  filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.6));
+  color: #e50914 !important;
 }
