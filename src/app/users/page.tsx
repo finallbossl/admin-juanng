@@ -157,7 +157,7 @@ export default function Users() {
         <Card className="glass-panel border-none shadow-none p-6 space-y-4">
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex justify-between items-center py-2 border-b border-white/5">
+              <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border-color)]">
                 <div className="flex gap-3 items-center flex-1">
                   <Skeleton className="h-10 w-10 bg-white/5 rounded-full" />
                   <div className="space-y-2 flex-1">
@@ -244,7 +244,7 @@ export default function Users() {
         <CardContent className="p-0 overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr className="border-bottom border-white/5">
+              <tr className="border-b border-[var(--border-color)]">
                 <th className="p-4 text-secondary font-semibold">Họ Tên</th>
                 <th className="p-4 text-secondary font-semibold">Vai Trò</th>
                 <th className="p-4 text-secondary font-semibold">Ngày Tham Gia</th>
@@ -252,13 +252,13 @@ export default function Users() {
                 <th className="p-4 text-secondary font-semibold text-right">Hành Động</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                  <tr key={user.id} className="hover:bg-[var(--bg-hover)] transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="w-10 h-10 border border-white/10 flex-shrink-0">
+                        <Avatar className="w-10 h-10 border border-[var(--border-color)] flex-shrink-0">
                           <AvatarFallback className="bg-gradient-to-tr from-primary-container to-on-primary-fixed-variant text-white font-bold">
                             {user.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
@@ -295,7 +295,7 @@ export default function Users() {
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="text-secondary hover:text-white cursor-pointer h-8 w-8 hover:bg-white/5" 
+                          className="text-secondary hover:text-on-surface cursor-pointer h-8 w-8 hover:bg-[var(--bg-hover)]" 
                           title="Chỉnh sửa"
                         >
                           <Edit2 size={15} />
@@ -304,7 +304,7 @@ export default function Users() {
                           variant="ghost" 
                           size="icon" 
                           onClick={() => handleToggleStatus(user.id, user.status)}
-                          className={`cursor-pointer h-8 w-8 hover:bg-white/5
+                          className={`cursor-pointer h-8 w-8 hover:bg-[var(--bg-hover)]
                             ${user.status === 'active' ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}
                           `}
                           title={user.status === 'active' ? 'Tạm khóa' : 'Mở khóa'}
@@ -329,8 +329,8 @@ export default function Users() {
 
       {/* Create User Side Sheet */}
       <Sheet open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <SheetContent className="glass-panel border-white/5 text-on-background sm:max-w-md">
-          <SheetHeader className="border-b border-white/5 pb-4 mb-4">
+        <SheetContent className="glass-panel border-[var(--border-color)] text-on-background sm:max-w-md">
+          <SheetHeader className="border-b border-[var(--border-color)] pb-4 mb-4">
             <SheetTitle className="font-headline-sm text-headline-sm text-on-surface">Thêm Tài Khoản Mới</SheetTitle>
           </SheetHeader>
           
@@ -344,7 +344,7 @@ export default function Users() {
                 value={newUserName}
                 onChange={(e) => setNewUserName(e.target.value)}
                 required
-                className="bg-surface border-white/5 text-on-surface focus-visible:ring-primary-container"
+                className="bg-surface border-[var(--border-color)] text-on-surface focus-visible:ring-primary-container"
               />
             </div>
 
@@ -357,7 +357,7 @@ export default function Users() {
                 value={newUserEmail}
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 required
-                className="bg-surface border-white/5 text-on-surface focus-visible:ring-primary-container"
+                className="bg-surface border-[var(--border-color)] text-on-surface focus-visible:ring-primary-container"
               />
             </div>
 
@@ -388,11 +388,11 @@ export default function Users() {
               </select>
             </div>
 
-            <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
+            <div className="flex justify-end gap-3 pt-6 border-t border-[var(--border-color)]">
               <Button 
                 type="button" 
                 variant="outline" 
-                className="border-white/10 text-secondary hover:bg-white/5 hover:text-white cursor-pointer"
+                className="border-[var(--border-color)] text-secondary hover:bg-[var(--bg-hover)] hover:text-on-surface cursor-pointer"
                 onClick={() => setIsModalOpen(false)}
               >
                 Hủy

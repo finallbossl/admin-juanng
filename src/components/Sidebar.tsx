@@ -292,15 +292,15 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
         onMouseMove={handleMouseMove}
         onMouseEnter={() => setIsMouseInSidebar(true)}
         onMouseLeave={() => setIsMouseInSidebar(false)}
-        className="border-r border-[rgba(229,9,20,0.12)]! sidebar-interactive-glow overflow-hidden w-[260px]!"
+        className="border-r border-[var(--border-sidebar)]! sidebar-interactive-glow overflow-hidden w-[260px]! transition-colors duration-250"
         style={{
           '--sidebar-width': '260px',
-          '--sidebar': 'rgba(8, 8, 8, 0.97)',
-          '--sidebar-border': 'rgba(229, 9, 20, 0.12)',
+          '--sidebar': 'var(--bg-sidebar)',
+          '--sidebar-border': 'var(--border-sidebar)',
           '--mouse-x': `${mouseCoords.x}px`,
           '--mouse-y': `${mouseCoords.y}px`,
           '--glow-opacity': isMouseInSidebar ? 1 : 0,
-          background: 'rgba(8, 8, 8, 0.97)',
+          background: 'var(--bg-sidebar)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
         } as React.CSSProperties}
@@ -350,14 +350,14 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
             </div>
             <div className="flex flex-col">
               <span className="text-[20px] font-black tracking-[-0.03em] leading-none flex items-baseline">
-                <span className="text-white">Cine</span>
-                <span className="text-[#E50914] font-black ml-0.5" style={{ textShadow: '0 0 10px rgba(229,9,20,0.35)' }}>Admin</span>
+                <span className="text-[var(--text-primary)]">Cine</span>
+                <span className="text-[var(--accent)] font-black ml-0.5" style={{ textShadow: '0 0 10px var(--accent-glow)' }}>Admin</span>
               </span>
               <div className="flex items-center gap-2 mt-1.5 leading-none">
-                <span className="text-[8px] font-extrabold tracking-[0.2em] uppercase text-white/30 leading-none">
+                <span className="text-[8px] font-extrabold tracking-[0.2em] uppercase leading-none" style={{ color: 'var(--text-sidebar)', opacity: 0.45 }}>
                   STREAM CONTROL
                 </span>
-                <span className="text-[6.5px] font-mono text-white/20 px-1 py-0.5 rounded-sm border border-white/5 bg-white/[0.02] leading-none tracking-normal">
+                <span className="text-[6.5px] font-mono px-1 py-0.5 rounded-sm border leading-none tracking-normal" style={{ color: 'var(--text-sidebar)', opacity: 0.35, borderColor: 'var(--border-sidebar)', background: 'var(--bg-hover)' }}>
                   SYS.REF: C09
                 </span>
               </div>
@@ -374,10 +374,10 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                 className="flex items-center gap-2.5 pr-2 mb-1"
                 style={{ paddingLeft: '32px' }}
               >
-                <span className="text-[10.5px] font-extrabold tracking-widest text-white/35 select-none uppercase">
+                <span className="text-[10.5px] font-extrabold tracking-widest select-none uppercase" style={{ color: 'var(--text-sidebar)', opacity: 0.55 }}>
                   {section.title}
                 </span>
-                <div className="flex-1 h-[1px] bg-white/5 opacity-40" />
+                <div className="flex-1 h-[1px]" style={{ background: 'var(--border-sidebar)', opacity: 0.4 }} />
               </div>
 
               {/* Section Items */}
@@ -399,18 +399,18 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                         onMouseLeave={() => setHoveredItemKey(null)}
                         className={`relative flex items-center pr-2! py-3! rounded-xl! transition-all! duration-200! cursor-pointer! group/nav select-none active:scale-[0.98]! h-auto! w-full! bg-transparent! border-none! outline-hidden!
                           ${active
-                            ? 'text-white!'
+                            ? 'text-[var(--text-sidebar-active)]!'
                             : isHovered
-                              ? 'text-white! bg-white/[0.05]!'
-                              : 'text-slate-300! hover:text-white!'
+                              ? 'text-[var(--text-sidebar-active)]! bg-[var(--bg-hover)]!'
+                              : 'text-[var(--text-sidebar)]! hover:text-[var(--text-sidebar-active)]!'
                           }
                         `}
                         style={{
                           paddingLeft: '32px',
                           ...(active ? {
-                            background: 'rgba(229, 9, 20, 0.12)',
-                            backgroundImage: 'radial-gradient(circle at left center, rgba(229, 9, 20, 0.20) 0%, transparent 60%)',
-                            boxShadow: '0 0 10px rgba(229, 9, 20, 0.05)',
+                            background: 'var(--accent-dim)',
+                            backgroundImage: 'radial-gradient(circle at left center, var(--accent-glow) 0%, transparent 60%)',
+                            boxShadow: '0 0 10px var(--accent-dim)',
                           } : {})
                         }}
                       >
@@ -418,9 +418,9 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                         <span
                           className={`absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r transition-all duration-300 ${
                             active
-                              ? 'bg-gradient-to-b from-[#E50914] to-[#9B0710] opacity-100 shadow-[0_0_8px_#E50914]'
+                              ? 'bg-gradient-to-b from-[var(--accent)] to-[var(--accent-dark)] opacity-100 shadow-[0_0_8px_var(--accent)]'
                               : isHovered
-                                ? 'bg-[#E50914]/40 opacity-100'
+                                ? 'bg-[var(--accent)]/40 opacity-100'
                                 : 'bg-transparent opacity-0'
                           }`}
                         />
@@ -430,7 +430,7 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
 
                         {/* Label (Icon 20px + Gap 16px = 36px. Aligns text precisely at 84px from left edge) */}
                         <span 
-                          className={`text-[13.8px] tracking-wide transition-colors duration-200 font-semibold ${active ? 'text-white' : 'text-slate-250'}`}
+                          className={`text-[13.8px] tracking-wide transition-colors duration-200 font-semibold ${active ? 'text-[var(--text-sidebar-active)]' : 'text-[var(--text-sidebar)]'}`}
                           style={{ marginLeft: '16px' }}
                         >
                           {item.label}
@@ -438,7 +438,7 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
 
                         {/* Glow indicator dot at the end of active menu item */}
                         {active && !item.children && (
-                          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#E50914] active-glow-dot" />
+                          <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--accent)] active-glow-dot" style={{ boxShadow: '0 0 4px var(--accent)' }} />
                         )}
 
                         {/* Numeric Badge with subtle shadow */}
@@ -446,8 +446,8 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                           <span
                             className="ml-auto px-2 py-0.5 rounded-full text-[9px] font-bold text-white transition-transform duration-200 group-hover/nav:scale-105"
                             style={{
-                              background: '#E50914',
-                              boxShadow: '0 0 8px rgba(229, 9, 20, 0.4)',
+                              background: 'var(--accent)',
+                              boxShadow: '0 0 8px var(--accent-glow)',
                               lineHeight: '1.2',
                             }}
                           >
@@ -460,8 +460,8 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                           <ChevronDown
                             size={16}
                             className={`ml-auto transition-transform duration-300 text-slate-400 ${
-                              expanded ? 'rotate-180 text-[#E50914]' : ''
-                            } ${isHovered ? 'text-white' : ''}`}
+                              expanded ? 'rotate-180 text-[var(--accent)]' : ''
+                            } ${isHovered ? 'text-[var(--text-sidebar-active)]' : ''}`}
                           />
                         )}
                       </SidebarMenuButton>
@@ -469,8 +469,8 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                       {/* Submenu links with indicators (Aligned text to exactly 84px: nav pl-4 (16) + ml-32 (32) + pl-6 (24) + ml-12 (12) = 84px) */}
                       {item.children && expanded && (
                         <SidebarMenuSub 
-                          className="flex flex-col gap-2 mt-1.5 border-l border-white/5 pl-5 py-1.5 transition-all duration-300 bg-transparent mx-0! border-r-0! border-t-0! border-b-0! outline-none!"
-                          style={{ marginLeft: '32px' }}
+                          className="flex flex-col gap-2 mt-1.5 border-l pl-5 py-1.5 transition-all duration-300 bg-transparent mx-0! border-r-0! border-t-0! border-b-0! outline-none!"
+                          style={{ marginLeft: '32px', borderColor: 'var(--border-sidebar)' }}
                         >
                           {item.children.map((child, cIdx) => {
                             const childActive = isUrlActive(child.href);
@@ -481,8 +481,8 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                                   isActive={childActive}
                                   className={`relative text-[13px]! py-1.5! pl-6! pr-2! transition-all! duration-200! cursor-pointer! select-none! block! hover:translate-x-1! h-auto! w-full! bg-transparent! border-none! outline-none!
                                     ${childActive
-                                      ? 'text-white! font-semibold!'
-                                      : 'text-slate-355! hover:text-white! font-medium!'
+                                      ? 'text-[var(--text-sidebar-active)]! font-semibold!'
+                                      : 'text-[var(--text-sidebar)]! hover:text-[var(--text-sidebar-active)]! font-medium!'
                                     }
                                   `}
                                 >
@@ -490,7 +490,7 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                                   <span
                                     className={`absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full transition-all duration-300 ${
                                       childActive
-                                        ? 'bg-[#E50914] shadow-[0_0_6px_#E50914] scale-100'
+                                        ? 'bg-[var(--accent)] shadow-[0_0_6px_var(--accent)] scale-100'
                                         : 'bg-slate-700 scale-75 opacity-40 hover:opacity-80'
                                     }`}
                                   />
@@ -516,8 +516,8 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
 
         {/* ── Technical Coordinates Readout (Aligned to 24px left and 24px right) ── */}
         <div 
-          className="pr-6 py-2.5 select-none flex justify-between text-[7.5px] font-mono text-white/15 border-t border-white/5 bg-[#040404]/30 z-10" 
-          style={{ paddingLeft: '24px' }}
+          className="pr-6 py-2.5 select-none flex justify-between text-[7.5px] font-mono border-t z-10 transition-colors duration-250" 
+          style={{ paddingLeft: '24px', color: 'var(--text-sidebar)', opacity: 0.5, borderColor: 'var(--border-sidebar)', background: 'var(--bg-hover)' }}
         >
           <span>LOC: VN-MAIN</span>
           <span>LAT 10.7629 // LNG 106.6601</span>
@@ -530,14 +530,14 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
         >
           {/* Floating Frosted Profile Card - inline padding to bypass shadcn overrides */}
           <div
-            className="flex items-center rounded-2xl border border-white/[0.06] transition-all duration-300 cursor-pointer group/profile
-              hover:border-[#E50914]/25 hover:bg-white/[0.03] hover:shadow-[0_0_15px_rgba(229,9,20,0.05)] bg-white/[0.01] relative overflow-hidden
+            className="flex items-center rounded-2xl border border-[var(--border-sidebar)] transition-all duration-300 cursor-pointer group/profile
+              hover:border-[var(--accent)]/25 hover:bg-[var(--bg-hover)] hover:shadow-[0_0_15px_var(--accent-glow)] bg-[var(--bg-hover)]/30 relative overflow-hidden transition-colors duration-250
             "
             style={{ padding: '10px 14px', gap: '12px', width: '100%' }}
           >
             <div className="relative flex-shrink-0">
               {/* Profile Avatar with spring scale & subtle gradient border */}
-              <div className="w-9 h-9 rounded-full border border-[#E50914]/30 p-0.5 overflow-hidden transition-all duration-300 group-hover/profile:border-[#E50914]/70 group-hover/profile:scale-105">
+              <div className="w-9 h-9 rounded-full border border-[var(--border-sidebar)] p-0.5 overflow-hidden transition-all duration-300 group-hover/profile:border-[var(--accent)]/70 group-hover/profile:scale-105">
                 <Avatar className="w-full h-full">
                   <AvatarImage
                     alt="Admin Profile"
@@ -546,20 +546,20 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
                   />
                   <AvatarFallback
                     className="text-white font-bold text-xs"
-                    style={{ background: 'linear-gradient(135deg, #E50914, #9B0710)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))' }}
                   >
                     AD
                   </AvatarFallback>
                 </Avatar>
               </div>
               {/* Glowing Pulse Online status dot */}
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-[#080808] bg-[#10B981] online-status-pulse" />
+              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border border-[var(--bg-sidebar)] bg-[#10B981] online-status-pulse transition-colors duration-250" />
             </div>
             <div className="flex flex-col min-w-0" style={{ flex: '1 1 0', overflow: 'hidden' }}>
-              <span className="font-bold text-[13.5px] leading-tight text-white truncate transition-colors duration-200 group-hover/profile:text-[#E50914]">
+              <span className="font-bold text-[13.5px] leading-tight text-[var(--text-primary)] truncate transition-colors duration-200 group-hover/profile:text-[var(--accent)]">
                 Cine Admin
               </span>
-              <span className="text-[8.5px] font-extrabold text-[#E50914] uppercase tracking-widest mt-1 leading-none opacity-90">
+              <span className="text-[8.5px] font-extrabold text-[var(--accent)] uppercase tracking-widest mt-1 leading-none opacity-90 transition-colors duration-250">
                 SYSTEM OWNER
               </span>
             </div>
@@ -572,8 +572,8 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
               onMouseLeave={() => setIsSettingsHovered(false)}
               className={`border rounded-xl transition-all duration-300 flex items-center justify-center p-2 active:scale-90 flex-shrink-0
                 ${isSettingsHovered
-                  ? 'text-[#E50914] bg-[#E50914]/10 border-[#E50914]/40 shadow-[0_0_12px_rgba(229,9,20,0.25)]'
-                  : 'text-slate-400 bg-white/5 border-white/10 hover:text-white hover:border-white/15'
+                  ? 'text-[var(--accent)] bg-[var(--accent-dim)] border-[var(--border-accent)] shadow-[0_0_12px_var(--accent-glow)]'
+                  : 'text-[var(--text-sidebar)] bg-[var(--bg-hover)] border-[var(--border-sidebar)] hover:text-[var(--text-sidebar-active)] hover:border-[var(--border-sidebar)]'
                 }
               `}
               style={{

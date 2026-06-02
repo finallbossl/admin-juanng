@@ -60,13 +60,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <TooltipProvider>
         <div
           className="flex h-screen w-full overflow-hidden relative"
-          style={{ background: '#0a0a0a', color: '#F8FAFC' }}
+          style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)', transition: 'background var(--transition-normal), color var(--transition-normal)' }}
         >
           {/* ── Cinematic background texture */}
           <div
             className="fixed inset-0 pointer-events-none"
             style={{
-              background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(229,9,20,0.04) 0%, transparent 60%)',
+              background: 'var(--bg-radial-gradient)',
               zIndex: 0,
             }}
           />
@@ -104,10 +104,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <nav
             className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-[68px]"
             style={{
-              background: 'rgba(8, 8, 8, 0.95)',
+              background: 'var(--bg-sidebar)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              borderTop: '1px solid rgba(229, 9, 20, 0.15)',
+              borderTop: '1px solid var(--border-sidebar)',
+              transition: 'background var(--transition-normal), border-color var(--transition-normal)',
             }}
           >
             {mobileNavItems.map((item, idx) => {
@@ -117,14 +118,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   key={idx}
                   href={item.href}
                   className="flex flex-col items-center justify-center flex-1 py-2 gap-1.5 transition-all active:scale-90 cursor-pointer relative"
-                  style={{ color: active ? '#E50914' : 'rgba(255,255,255,0.3)' }}
+                  style={{ color: active ? 'var(--accent)' : 'var(--text-sidebar)' }}
                 >
                   <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: active ? "'FILL' 1" : "'FILL' 0" }}>
                     {item.icon}
                   </span>
                   <span
                     className="text-[10px] font-semibold tracking-wider"
-                    style={{ color: active ? '#E50914' : 'rgba(255,255,255,0.3)' }}
+                    style={{ color: active ? 'var(--accent)' : 'var(--text-sidebar)' }}
                   >
                     {item.label}
                   </span>
@@ -132,8 +133,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <span
                       className="absolute bottom-0 w-10 h-0.5 rounded-full"
                       style={{
-                        background: '#E50914',
-                        boxShadow: '0 0 8px rgba(229,9,20,0.8)',
+                        background: 'var(--accent)',
+                        boxShadow: '0 0 8px var(--accent-glow-strong)',
                       }}
                     />
                   )}
@@ -142,13 +143,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             })}
           </nav>
 
-          {/* ── Scanline Effect Overlay ── */}
+          {/* ── Scanline / Grid Effect Overlay ── */}
           <div
             className="fixed inset-0 pointer-events-none"
             style={{
-              background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.02))',
-              backgroundSize: '100% 2px, 3px 100%',
+              background: 'var(--scanline-bg)',
+              backgroundSize: 'var(--scanline-size)',
               zIndex: 100,
+              transition: 'background var(--transition-normal), background-size var(--transition-normal)',
             }}
           />
         </div>
