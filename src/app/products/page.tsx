@@ -158,7 +158,12 @@ function ProductsContent() {
       const res = await api.get<any[]>('/catalog/sync/sources');
       const list = res.result || [];
       setSources(list);
-      if (list.length > 0) {
+      
+      // Default to the first active source if available, otherwise fallback to the first element
+      const firstActive = list.find(s => s.active);
+      if (firstActive) {
+        setSelectedSourceId(firstActive.id.toString());
+      } else if (list.length > 0) {
         setSelectedSourceId(list[0].id.toString());
       }
     } catch (err) {
@@ -264,6 +269,11 @@ function ProductsContent() {
       alert('Vui lòng cấu hình nguồn.');
       return;
     }
+    const selectedSource = sources.find(s => s.id.toString() === selectedSourceId);
+    if (selectedSource && !selectedSource.active) {
+      alert(`Nguồn phim "${selectedSource.name}" hiện đang tạm khóa. Vui lòng kích hoạt lại nguồn này trong phần Thiết lập.`);
+      return;
+    }
     setSyncing(true);
     setProgressCurrent(0);
     setProgressTotal(1);
@@ -289,6 +299,11 @@ function ProductsContent() {
   const handleFetchPreview = async () => {
     if (!selectedSourceId) {
       alert('Vui lòng chọn nguồn phim trước.');
+      return;
+    }
+    const selectedSource = sources.find(s => s.id.toString() === selectedSourceId);
+    if (selectedSource && !selectedSource.active) {
+      alert(`Nguồn phim "${selectedSource.name}" hiện đang tạm khóa. Vui lòng kích hoạt lại nguồn này trong phần Thiết lập.`);
       return;
     }
     setPreviewLoading(true);
@@ -577,7 +592,13 @@ function ProductsContent() {
                       return (
                         <div
                           key={src.id}
-                          onClick={() => setSelectedSourceId(src.id.toString())}
+                          onClick={() => {
+                            if (!src.active) {
+                              alert(`Nguồn phim "${src.name}" hiện đang tạm khóa. Bạn có thể kích hoạt lại nguồn này trong phần Thiết lập.`);
+                              return;
+                            }
+                            setSelectedSourceId(src.id.toString());
+                          }}
                           className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none flex items-center justify-between gap-4
                             ${isSelected 
                               ? 'bg-[var(--accent-dim)]/20 border-[var(--accent)] shadow-[0_0_12px_var(--accent-glow)]' 
@@ -764,6 +785,71 @@ function ProductsContent() {
                     )}
                   </div>
 
+                  {/* 2.5 Real-time Sync Progress & Console Logs */}
+                  {progressLogs.length > 0 && (
+                    <div className="space-y-4" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+                      <label className="text-xs font-bold text-secondary uppercase tracking-wider">Tiến trình đồng bộ thực tế (Sync Progress & Logs)</label>
+                      <div className="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30 space-y-4">
+                        {/* Progress Bar & Status Text */}
+                        <div className="flex justify-between items-center text-xs font-semibold">
+                          <span className="text-on-surface flex items-center gap-2">
+                            {syncing ? (
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]"></span>
+                              </span>
+                            ) : (
+                              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            )}
+                            {syncing ? 'Đang đồng bộ dữ liệu...' : 'Đã hoàn tất đồng bộ'}
+                          </span>
+                          <span className="text-secondary font-mono">
+                            {progressCurrent} / {progressTotal} phim ({progressPercent}%)
+                          </span>
+                        </div>
+                        
+                        {/* Progress Track */}
+                        <div className="w-full bg-[var(--bg-hover)] h-2 rounded-full overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-[var(--accent)] to-rose-600 h-full rounded-full transition-all duration-300"
+                            style={{ width: `${progressPercent}%` }}
+                          />
+                        </div>
+
+                        {/* Log Console Terminal */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-[10px] font-bold text-secondary uppercase tracking-wider">
+                            <span>Nhật ký chi tiết (Console Output)</span>
+                            <button 
+                              type="button" 
+                              onClick={() => setProgressLogs([])}
+                              className="text-rose-400 hover:text-rose-300 transition-colors cursor-pointer select-none"
+                            >
+                              Xóa nhật ký
+                            </button>
+                          </div>
+                          <div className="bg-black/80 rounded-xl p-4 font-mono text-[11px] text-slate-300 max-h-[220px] overflow-y-auto space-y-1.5 shadow-inner border border-white/5">
+                            {progressLogs.map((log, lIdx) => {
+                              let logColor = 'text-slate-300';
+                              if (log.includes('[Thành công]')) logColor = 'text-emerald-400 font-semibold';
+                              else if (log.includes('[Thất bại]') || log.includes('[Lỗi]')) logColor = 'text-rose-400 font-semibold';
+                              else if (log.includes('[Đang tải]')) logColor = 'text-cyan-400';
+                              else if (log.includes('[Hệ thống]') || log.includes('[Hoàn tất]')) logColor = 'text-[var(--accent)] font-bold';
+                              
+                              return (
+                                <div key={lIdx} className={logColor}>
+                                  {log}
+                                </div>
+                              );
+                            })}
+                            {/* Autoscroll dummy anchor */}
+                            <div ref={(el) => { if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
 
                 {/* 3. Items Selection Table (For Method B Preview) */}
@@ -819,17 +905,16 @@ function ProductsContent() {
                                   />
                                   
                                   {/* Thumbnail Poster */}
-                                  <div className="w-12 h-16 rounded-xl bg-[var(--bg-hover)] overflow-hidden flex-shrink-0 border border-[var(--border-color)] flex items-center justify-center">
-                                    {item.posterUrl || item.thumbUrl ? (
+                                  <div className="w-12 h-16 rounded-xl bg-[var(--bg-hover)] overflow-hidden flex-shrink-0 border border-[var(--border-color)] flex items-center justify-center relative">
+                                    <Film className="h-5 w-5 text-secondary absolute" />
+                                    {(item.poster_url || item.thumb_url || item.posterUrl || item.thumbUrl) && (
                                       // eslint-disable-next-line @next/next/no-img-element
                                       <img
-                                        src={item.posterUrl || item.thumbUrl}
+                                        src={item.poster_url || item.thumb_url || item.posterUrl || item.thumbUrl}
                                         alt=""
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover absolute inset-0 z-10"
                                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                                       />
-                                    ) : (
-                                      <Film className="h-5 w-5 text-secondary" />
                                     )}
                                   </div>
 
@@ -838,7 +923,7 @@ function ProductsContent() {
                                       {item.name}
                                       {isChecked && <Check size={12} className="text-[var(--accent)]" />}
                                     </div>
-                                    <div className="text-[10px] text-secondary truncate mt-1">{item.originName || item.slug}</div>
+                                    <div className="text-[10px] text-secondary truncate mt-1">{item.originName || item.origin_name || item.slug}</div>
                                   </div>
 
                                   <div className="flex items-center gap-4 text-right" style={{ paddingRight: '8px' }}>
@@ -846,7 +931,7 @@ function ProductsContent() {
                                       {item.year || '2026'}
                                     </span>
                                     <span className="text-[10px] text-[var(--accent)] font-bold bg-[var(--accent-dim)] border border-[var(--accent-accent)] rounded-xl" style={{ padding: '4px 10px' }}>
-                                      {item.episodeCurrent || 'Full'}
+                                      {item.episodeCurrent || item.episode_current || 'Full'}
                                     </span>
                                   </div>
                               </div>

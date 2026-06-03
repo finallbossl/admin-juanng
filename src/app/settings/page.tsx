@@ -37,13 +37,17 @@ interface SyncSource {
   lastSyncedAt?: string | null;
 }
 
-const MOCK_HISTORY = [
-  { id: 1, source: 'OPhim', type: 'Đồng bộ trang (Crawl Page)', detail: 'Trang 1', status: 'SUCCESS', count: 20, time: '34s', date: '03/06/2026 12:45' },
-  { id: 2, source: 'KKPhim', type: 'Đồng bộ trang (Crawl Page)', detail: 'Trang 3', status: 'SUCCESS', count: 18, time: '29s', date: '03/06/2026 10:12' },
-  { id: 3, source: 'OPhim', type: 'Xem trước & Chọn (Preview)', detail: 'Đã lưu 5 phim được chọn', status: 'SUCCESS', count: 5, time: '12s', date: '02/06/2026 18:30' },
-  { id: 4, source: 'KKPhim', type: 'Đồng bộ trang (Crawl Page)', detail: 'Trang 1', status: 'SUCCESS', count: 20, time: '32s', date: '02/06/2026 14:05' },
-  { id: 5, source: 'VSMov', type: 'Đồng bộ trang (Crawl Page)', detail: 'Trang 2', status: 'FAILED', error: 'Kết nối API máy chủ nguồn thất bại (Gateway Timeout)', count: 0, time: '15s', date: '01/06/2026 09:22' },
-];
+interface SyncHistoryEntry {
+  id: number;
+  source: string;
+  syncType: string;
+  detail: string;
+  status: string;
+  error?: string;
+  count: number;
+  duration: string;
+  createdAt: string;
+}
 
 function SettingsContent() {
   const router = useRouter();
@@ -69,6 +73,11 @@ function SettingsContent() {
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
 
+  // History Tab States
+  const [historyLogs, setHistoryLogs] = useState<SyncHistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+
   // UI Interactive States
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
@@ -86,10 +95,31 @@ function SettingsContent() {
     }
   };
 
+  // Fetch Sync History
+  const fetchHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const res = await api.get<SyncHistoryEntry[]>('/catalog/sync/history');
+      setHistoryLogs(res.result || []);
+    } catch (err: any) {
+      setHistoryError(err.message || 'Không thể tải lịch sử đồng bộ.');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   useEffect(() => {
     setIsMounted(true);
     fetchSources();
+    fetchHistory();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'history') {
+      fetchHistory();
+    }
+  }, [activeTab]);
 
   // Open Dialog for adding new source
   const handleOpenAddDialog = () => {
@@ -475,39 +505,73 @@ function SettingsContent() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
-                      {MOCK_HISTORY.map((hist) => (
-                        <tr key={hist.id} className="hover:bg-[var(--bg-hover)]/10 transition-colors">
-                          <td style={{ padding: '16px 20px' }} className="font-bold text-on-surface">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-                              {hist.source}
+                      {historyLoading ? (
+                        <tr>
+                          <td colSpan={7} style={{ padding: '32px', textAlign: 'center' }}>
+                            <div className="flex justify-center items-center gap-2 text-slate-400">
+                              <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'var(--accent)', borderRadius: '50%' }} className="animate-spin" />
+                              <span>Đang tải lịch sử...</span>
                             </div>
                           </td>
-                          <td style={{ padding: '16px 20px' }} className="text-slate-500 dark:text-slate-400">{hist.type}</td>
-                          <td style={{ padding: '16px 20px' }} className="text-slate-700 dark:text-slate-300">
-                            {hist.detail}
-                            {hist.error && (
-                              <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }} className="text-[10px] text-rose-600 dark:text-rose-400">
-                                <AlertTriangle size={11} />
-                                {hist.error}
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ padding: '16px 20px' }}>
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase border
-                              ${hist.status === 'SUCCESS' 
-                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' 
-                                : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
-                              }`}
-                            >
-                              {hist.status === 'SUCCESS' ? 'Thành công' : 'Thất bại'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '16px 20px', textAlign: 'center' }} className="font-bold text-on-surface">{hist.count} phim</td>
-                          <td style={{ padding: '16px 20px', textAlign: 'center' }} className="text-slate-500 dark:text-slate-400">{hist.time}</td>
-                          <td style={{ padding: '16px 20px', textAlign: 'right' }} className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">{hist.date}</td>
                         </tr>
-                      ))}
+                      ) : historyError ? (
+                        <tr>
+                          <td colSpan={7} style={{ padding: '32px' }}>
+                            <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-5 py-4 rounded-xl text-xs flex items-center justify-center gap-2">
+                              <AlertTriangle size={15} />
+                              {historyError}
+                            </div>
+                          </td>
+                        </tr>
+                      ) : historyLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{ padding: '48px', textAlign: 'center' }} className="text-[var(--text-secondary)] text-xs">
+                            Không có lịch sử đồng bộ phim nào trong hệ thống.
+                          </td>
+                        </tr>
+                      ) : (
+                        historyLogs.map((hist) => (
+                          <tr key={hist.id} className="hover:bg-[var(--bg-hover)]/10 transition-colors">
+                            <td style={{ padding: '16px 20px' }} className="font-bold text-on-surface">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+                                {hist.source}
+                              </div>
+                            </td>
+                            <td style={{ padding: '16px 20px' }} className="text-slate-500 dark:text-slate-400">{hist.syncType}</td>
+                            <td style={{ padding: '16px 20px' }} className="text-slate-700 dark:text-slate-300">
+                              {hist.detail}
+                              {hist.error && (
+                                <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }} className="text-[10px] text-rose-600 dark:text-rose-400">
+                                  <AlertTriangle size={11} />
+                                  {hist.error}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '16px 20px' }}>
+                              <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase border
+                                ${hist.status === 'SUCCESS' 
+                                  ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' 
+                                  : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
+                                }`}
+                              >
+                                {hist.status === 'SUCCESS' ? 'Thành công' : 'Thất bại'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '16px 20px', textAlign: 'center' }} className="font-bold text-on-surface">{hist.count} phim</td>
+                            <td style={{ padding: '16px 20px', textAlign: 'center' }} className="text-slate-500 dark:text-slate-400">{hist.duration}</td>
+                            <td style={{ padding: '16px 20px', textAlign: 'right' }} className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">
+                              {new Date(hist.createdAt).toLocaleString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
