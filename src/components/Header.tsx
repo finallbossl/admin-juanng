@@ -201,7 +201,7 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
           </button>
 
           {/* Breadcrumb */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
             {/* Page icon accent bar */}
             <div style={{
               width: '3px',
@@ -212,7 +212,7 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
               flexShrink: 0,
             }} />
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
               {/* Main title */}
               <h1 style={{
                 fontSize: '16px',
@@ -221,6 +221,9 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
                 lineHeight: 1,
                 color: 'var(--text-primary)',
                 margin: 0,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}>
                 {meta.main}
               </h1>
@@ -232,6 +235,9 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
                   color: 'var(--text-muted)',
                   letterSpacing: '0.05em',
                   lineHeight: 1,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}>
                   {meta.sub}
                 </span>
@@ -264,7 +270,6 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
           {/* LIVE clock indicator — desktop only */}
           <div
             style={{
-              display: 'flex',
               alignItems: 'center',
               gap: '7px',
               padding: '5px 10px',
@@ -315,14 +320,14 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
               ref={searchRef}
               id="header-search"
               type="text"
-              placeholder="Tìm kiếm phim, người dùng..."
+              placeholder="Tìm kiếm..."
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
               style={{
                 paddingLeft: '34px',
-                paddingRight: searchValue ? '32px' : '12px',
+                paddingRight: searchFocused ? (searchValue ? '32px' : '12px') : '54px',
                 paddingTop: '8px',
                 paddingBottom: '8px',
                 fontSize: '12.5px',

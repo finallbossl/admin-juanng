@@ -71,19 +71,19 @@ export default function Analytics() {
     return (
       <div className="space-y-6">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-64 bg-white/5" />
-          <Skeleton className="h-4 w-96 bg-white/5" />
+          <Skeleton className="h-8 w-64 bg-[var(--bg-hover)]" />
+          <Skeleton className="h-4 w-96 bg-[var(--bg-hover)]" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="glass-panel border-none shadow-none p-6 space-y-4">
+            <Card key={i} className="glass-panel border-none shadow-none p-6! space-y-4">
               <div className="flex items-center gap-2">
-                <Skeleton className="h-5 w-5 bg-white/5 rounded-full" />
-                <Skeleton className="h-5 w-40 bg-white/5" />
+                <Skeleton className="h-5 w-5 bg-[var(--bg-hover)] rounded-full" />
+                <Skeleton className="h-5 w-40 bg-[var(--bg-hover)]" />
               </div>
               <div className="space-y-4 pt-4">
-                <Skeleton className="h-10 bg-white/5 rounded-md" />
-                <Skeleton className="h-10 bg-white/5 rounded-md" />
+                <Skeleton className="h-10 bg-[var(--bg-hover)] rounded-md" />
+                <Skeleton className="h-10 bg-[var(--bg-hover)] rounded-md" />
               </div>
             </Card>
           ))}
@@ -108,12 +108,12 @@ export default function Analytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Performance metrics */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6 pb-4 border-b border-white/5 flex flex-row items-center gap-2 space-y-0">
+          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
             <Cpu size={20} className="text-primary" />
             <CardTitle className="font-headline-sm text-headline-sm">Hiệu Năng Máy Chủ (Tự động cập nhật mỗi 5s)</CardTitle>
           </CardHeader>
           
-          <CardContent className="p-6 space-y-5">
+          <CardContent className="p-6! space-y-5">
             {performanceStats.map((stat, idx) => (
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
@@ -121,7 +121,7 @@ export default function Analytics() {
                   <span className="font-semibold text-on-surface">{stat.value} {stat.unit}</span>
                 </div>
                 <Progress value={stat.percent} className="w-full flex-col gap-0">
-                  <ProgressTrack className="bg-white/5 h-2">
+                  <ProgressTrack className="bg-[var(--bg-hover)] h-2">
                     <ProgressIndicator 
                       className="transition-all"
                       style={{ backgroundColor: stat.color }}
@@ -135,12 +135,12 @@ export default function Analytics() {
 
         {/* System metrics summary */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6 pb-4 border-b border-white/5 flex flex-row items-center gap-2 space-y-0">
+          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
             <Server size={20} className="text-blue-400" />
             <CardTitle className="font-headline-sm text-headline-sm">Thông Tin Máy Chủ</CardTitle>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-3.5">
+          <CardContent className="p-6! space-y-3.5">
             <div className="flex justify-between items-center text-sm">
               <span className="text-secondary">Trạng thái dịch vụ</span>
               <span className="font-semibold text-primary">Hoạt động bình thường</span>
@@ -170,12 +170,12 @@ export default function Analytics() {
 
         {/* Browser breakdown */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6 pb-4 border-b border-white/5 flex flex-row items-center gap-2 space-y-0">
+          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
             <Globe size={20} className="text-yellow-500" />
             <CardTitle className="font-headline-sm text-headline-sm">Trình Duyệt Truy Cập</CardTitle>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-3.5">
+          <CardContent className="p-6! space-y-3.5">
             {browserStats.map((stat, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm">
                 <span className="text-secondary">{stat.label}</span>
@@ -187,12 +187,12 @@ export default function Analytics() {
 
         {/* Region breakdown */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6 pb-4 border-b border-white/5 flex flex-row items-center gap-2 space-y-0">
+          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
             <Globe size={20} className="text-red-400" />
             <CardTitle className="font-headline-sm text-headline-sm">Khu Vực Địa Lý</CardTitle>
           </CardHeader>
 
-          <CardContent className="p-6 space-y-3.5">
+          <CardContent className="p-6! space-y-3.5">
             {regionStats.map((stat, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm">
                 <span className="text-secondary">{stat.label}</span>

@@ -19,15 +19,15 @@ export default function Support() {
       </div>
 
       <Card className="glass-panel border-none shadow-none">
-        <CardHeader className="p-6 pb-4 border-b border-white/5 flex flex-row items-center gap-2 space-y-0">
+        <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
           <MessageSquare size={20} className="text-primary" />
           <CardTitle className="font-headline-sm text-headline-sm">Phiếu Hỗ Trợ Đang Xử Lý</CardTitle>
         </CardHeader>
 
-        <CardContent className="p-0 overflow-x-auto">
+        <CardContent className="p-0! overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
-              <tr className="border-bottom border-white/5">
+              <tr className="border-b border-[var(--border-color)]">
                 <th className="p-4 text-secondary font-semibold">Mã Phiếu</th>
                 <th className="p-4 text-secondary font-semibold">Tiêu Đề</th>
                 <th className="p-4 text-secondary font-semibold">Khách Hàng</th>
@@ -35,9 +35,9 @@ export default function Support() {
                 <th className="p-4 text-secondary font-semibold">Trạng Thái</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-[var(--border-color)]">
               {tickets.map((t, idx) => (
-                <tr key={idx} className="hover:bg-white/5 transition-colors">
+                <tr key={idx} className="hover:bg-[var(--bg-hover)] transition-colors">
                   <td className="p-4 font-semibold text-secondary">{t.id}</td>
                   <td className="p-4 font-medium text-on-surface">{t.title}</td>
                   <td className="p-4 text-on-surface">{t.user}</td>
@@ -51,7 +51,7 @@ export default function Support() {
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold
                       ${t.status === 'Đã đóng' 
-                        ? 'bg-white/5 text-secondary' 
+                        ? 'bg-[var(--bg-hover)] text-secondary' 
                         : t.status === 'Mở' 
                           ? 'bg-blue-500/10 text-blue-400' 
                           : 'bg-yellow-500/10 text-yellow-400'

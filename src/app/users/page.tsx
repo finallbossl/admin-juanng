@@ -154,7 +154,7 @@ export default function Users() {
             <Skeleton className="h-10 w-36 bg-white/5 rounded-md" />
           </div>
         </div>
-        <Card className="glass-panel border-none shadow-none p-6 space-y-4">
+        <Card className="glass-panel border-none shadow-none p-6! space-y-4">
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border-color)]">
@@ -241,7 +241,7 @@ export default function Users() {
 
       {/* Users Table Card */}
       <Card className="glass-panel border-none shadow-none">
-        <CardContent className="p-0 overflow-x-auto">
+        <CardContent className="p-0! overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border-color)]">

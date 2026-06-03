@@ -64,22 +64,22 @@ export default function Settings() {
     return (
       <div className="space-y-6 max-w-3xl">
         <div className="space-y-2">
-          <Skeleton className="h-8 w-64 bg-white/5" />
-          <Skeleton className="h-4 w-96 bg-white/5" />
+          <Skeleton className="h-8 w-64 bg-[var(--bg-hover)]" />
+          <Skeleton className="h-4 w-96 bg-[var(--bg-hover)]" />
         </div>
-        <Card className="glass-panel border-none shadow-none p-6 space-y-6">
+        <Card className="glass-panel border-none shadow-none p-6! space-y-6">
           <div className="space-y-4">
-            <Skeleton className="h-5 w-40 bg-white/5" />
+            <Skeleton className="h-5 w-40 bg-[var(--bg-hover)]" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Skeleton className="h-10 bg-white/5 rounded-md" />
-              <Skeleton className="h-10 bg-white/5 rounded-md" />
+              <Skeleton className="h-10 bg-[var(--bg-hover)] rounded-md" />
+              <Skeleton className="h-10 bg-[var(--bg-hover)] rounded-md" />
             </div>
           </div>
           <div className="space-y-4 pt-4">
-            <Skeleton className="h-5 w-40 bg-white/5" />
+            <Skeleton className="h-5 w-40 bg-[var(--bg-hover)]" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Skeleton className="h-10 bg-white/5 rounded-md" />
-              <Skeleton className="h-10 bg-white/5 rounded-md" />
+              <Skeleton className="h-10 bg-[var(--bg-hover)] rounded-md" />
+              <Skeleton className="h-10 bg-[var(--bg-hover)] rounded-md" />
             </div>
           </div>
         </Card>
@@ -102,9 +102,9 @@ export default function Settings() {
 
       <Card className="glass-panel border-none shadow-none">
         <form onSubmit={handleSubmit}>
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-6! space-y-6">
             <div>
-              <h2 className="text-base font-semibold text-on-surface border-b border-white/5 pb-2 mb-4">Thông Tin Tài Khoản</h2>
+              <h2 className="text-base font-semibold text-on-surface border-b border-[var(--border-color)] pb-2 mb-4">Thông Tin Tài Khoản</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="username" className="text-xs font-semibold text-secondary">Tên Đăng Nhập</label>
@@ -113,7 +113,7 @@ export default function Settings() {
                     id="username" 
                     value={username}
                     disabled
-                    className="bg-surface border-white/5 text-on-surface/60 cursor-not-allowed"
+                    className="bg-surface border-[var(--border-color)] text-on-surface/60 cursor-not-allowed"
                   />
                 </div>
                 
@@ -124,14 +124,14 @@ export default function Settings() {
                     id="email" 
                     value={email}
                     disabled
-                    className="bg-surface border-white/5 text-on-surface/60 cursor-not-allowed"
+                    className="bg-surface border-[var(--border-color)] text-on-surface/60 cursor-not-allowed"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <h2 className="text-base font-semibold text-on-surface border-b border-white/5 pb-2 mb-4">Thông Tin Cá Nhân</h2>
+              <h2 className="text-base font-semibold text-on-surface border-b border-[var(--border-color)] pb-2 mb-4">Thông Tin Cá Nhân</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label htmlFor="fullName" className="text-xs font-semibold text-secondary">Họ và Tên</label>
@@ -142,7 +142,7 @@ export default function Settings() {
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Nhập họ và tên hiển thị..."
                     required
-                    className="bg-surface border-white/5 text-on-surface focus-visible:ring-primary-container"
+                    className="bg-surface border-[var(--border-color)] text-on-surface focus-visible:ring-primary-container"
                   />
                 </div>
                 
@@ -154,13 +154,13 @@ export default function Settings() {
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     placeholder="https://example.com/avatar.jpg"
-                    className="bg-surface border-white/5 text-on-surface focus-visible:ring-primary-container"
+                    className="bg-surface border-[var(--border-color)] text-on-surface focus-visible:ring-primary-container"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end items-center gap-3 pt-4 border-t border-white/5">
+            <div className="flex justify-end items-center gap-3 pt-4 border-t border-[var(--border-color)]">
               {isSaved && (
                 <span className="text-green-500 text-sm font-medium mr-2">
                   ✓ Đã lưu cấu hình thành công!
@@ -169,7 +169,7 @@ export default function Settings() {
               <Button 
                 type="button" 
                 variant="outline"
-                className="border-white/10 text-secondary hover:bg-white/5 hover:text-white cursor-pointer"
+                className="border-[var(--border-color)] text-secondary hover:bg-[var(--bg-hover)] hover:text-on-surface cursor-pointer"
                 onClick={() => window.location.reload()}
               >
                 Hủy thay đổi

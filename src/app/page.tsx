@@ -197,7 +197,7 @@ export default function DashboardHome() {
               id: m.id, name: m.name,
               type: m.type || 'Phim lẻ',
               quality: m.quality || 'HD',
-              time: m.time ? `${m.time} phút` : 'Chưa rõ',
+              time: m.time ? (m.time.toString().includes('phút') ? m.time : `${m.time} phút`) : 'Chưa rõ',
               createdAt: m.createdAt,
               thumbUrl: m.thumbUrl || '',
             }))
@@ -267,7 +267,7 @@ export default function DashboardHome() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
         {/* TOTAL VIEWS */}
-        <div className="stat-card">
+        <div className="stat-card" style={{ padding: '20px', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2"
@@ -317,7 +317,7 @@ export default function DashboardHome() {
         </div>
 
         {/* REVENUE */}
-        <div className="stat-card">
+        <div className="stat-card" style={{ padding: '20px', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2"
@@ -338,7 +338,7 @@ export default function DashboardHome() {
               </svg>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-auto">
+          <div className="flex items-center gap-3 mt-auto" style={{ marginTop: '12px' }}>
             <span className="text-[12px] font-bold flex items-center gap-1" style={{ color: 'var(--success)' }}>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
                 <polyline points="2,10 7,5 10,8 14,3" /><polyline points="11,3 14,3 14,6" />
@@ -360,7 +360,7 @@ export default function DashboardHome() {
         </div>
 
         {/* NEW USERS */}
-        <div className="stat-card">
+        <div className="stat-card" style={{ padding: '20px', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-2"
@@ -382,7 +382,7 @@ export default function DashboardHome() {
               </svg>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-auto">
+          <div className="flex items-center gap-3 mt-auto" style={{ marginTop: '12px' }}>
             <span className="text-[12px] font-bold flex items-center gap-1" style={{ color: 'var(--success)' }}>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
                 <polyline points="2,10 7,5 10,8 14,3" /><polyline points="11,3 14,3 14,6" />
@@ -427,8 +427,8 @@ export default function DashboardHome() {
           {/* ── Area Chart Panel ── */}
           <Panel>
             <div
-              className="flex items-center justify-between px-5 py-4"
-              style={{ borderBottom: '1px solid var(--border-color)' }}
+              className="flex items-center justify-between"
+              style={{ borderBottom: '1px solid var(--border-color)', padding: '16px 20px' }}
             >
               <div>
                 <h3 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -451,7 +451,7 @@ export default function DashboardHome() {
                 </div>
               </div>
             </div>
-            <div className="px-5 py-4">
+            <div style={{ padding: '16px 20px' }}>
               {/* Total stat above chart */}
               <p className="text-[28px] font-black tracking-tight mb-3" style={{ color: 'var(--text-primary)' }}>
                 1.2<span style={{ color: 'var(--accent)' }}>M</span>{' '}
@@ -466,8 +466,8 @@ export default function DashboardHome() {
           {/* ── New Uploads ── */}
           <Panel>
             <div
-              className="flex items-center justify-between px-5 py-4"
-              style={{ borderBottom: '1px solid var(--border-color)' }}
+              className="flex items-center justify-between"
+              style={{ borderBottom: '1px solid var(--border-color)', padding: '16px 20px' }}
             >
               <h3 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
                 New Uploads
@@ -488,8 +488,8 @@ export default function DashboardHome() {
                 return (
                   <div
                     key={movie.id}
-                    className="flex items-center gap-4 px-4 py-3.5 cursor-pointer group/row transition-colors"
-                    style={{ borderBottom: idx < movies.length - 1 ? '1px solid var(--border-color)' : 'none' }}
+                    className="flex items-center gap-4 cursor-pointer group/row transition-colors"
+                    style={{ borderBottom: idx < movies.length - 1 ? '1px solid var(--border-color)' : 'none', padding: '14px 16px' }}
                     onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)')}
                     onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}
                   >
@@ -560,10 +560,10 @@ export default function DashboardHome() {
 
             {/* Performance / Server Status */}
             <Panel>
-              <div className="p-5">
+              <div style={{ padding: '20px' }}>
                 <div
-                  className="flex items-center justify-between mb-5"
-                  style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px' }}
+                  className="flex items-center justify-between"
+                  style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '20px' }}
                 >
                   <h3 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
                     Server Status
@@ -675,10 +675,11 @@ export default function DashboardHome() {
 
             {/* Add New Content */}
             <div
-              className="rounded-2xl p-5 flex flex-col items-center justify-center text-center gap-4 cursor-pointer transition-colors duration-250"
+              className="rounded-2xl flex flex-col items-center justify-center text-center gap-4 cursor-pointer transition-colors duration-250"
               style={{
                 background: 'var(--accent-dim)',
                 border: '1px dashed var(--border-accent)',
+                padding: '20px',
                 transition: 'background 200ms ease, border-color 200ms ease, transform 200ms ease',
               }}
               onMouseEnter={e => {
@@ -735,8 +736,8 @@ export default function DashboardHome() {
             ═══════════════════════════════════════════════ */}
         <Panel className="flex flex-col">
           <div
-            className="px-5 py-4 flex items-center justify-between flex-shrink-0"
-            style={{ borderBottom: '1px solid var(--border-color)' }}
+            className="flex items-center justify-between flex-shrink-0"
+            style={{ borderBottom: '1px solid var(--border-color)', padding: '16px 20px' }}
           >
             <div>
               <h3 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -760,11 +761,12 @@ export default function DashboardHome() {
             </div>
           </div>
 
-          <div className="flex-1 p-2">
+          <div className="flex-1" style={{ padding: '8px' }}>
             {users.map((user, idx) => (
               <div
                 key={user.id}
-                className="flex items-center gap-3 px-3 py-3 rounded-xl transition-colors cursor-pointer"
+                className="flex items-center gap-3 rounded-xl transition-colors cursor-pointer"
+                style={{ padding: '12px' }}
                 onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--bg-hover)')}
                 onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}
               >
