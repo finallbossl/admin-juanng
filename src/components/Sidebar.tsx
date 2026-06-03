@@ -80,18 +80,9 @@ const navigationSections: NavigationSection[] = [
         ],
       },
       {
-        label: 'Crawler & Nguồn',
+        label: 'Cấu hình nguồn phim',
+        href: '/settings?tab=crawler',
         icon: 'Database',
-        children: [
-          {
-            label: 'Cấu hình crawler',
-            href: '/settings',
-          },
-          {
-            label: 'Lịch sử crawl',
-            href: '/settings?tab=history',
-          },
-        ],
       },
     ],
   },
