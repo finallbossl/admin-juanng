@@ -79,7 +79,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             className="flex flex-col flex-1 min-w-0 h-screen overflow-hidden relative bg-transparent border-none!"
             style={{ zIndex: 1 }}
           >
-            <Header />
+            <React.Suspense fallback={<div style={{ height: '60px', background: 'var(--bg-header)' }} />}>
+              <Header />
+            </React.Suspense>
 
             <main
               id="main-scroll"

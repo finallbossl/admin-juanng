@@ -142,34 +142,34 @@ export default function Users() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
-            <Skeleton className="h-8 w-64 bg-white/5" />
-            <Skeleton className="h-4 w-96 bg-white/5" />
+            <Skeleton className="h-8 w-64 bg-[var(--bg-hover)]" />
+            <Skeleton className="h-4 w-96 bg-[var(--bg-hover)]" />
           </div>
-          <Skeleton className="h-10 w-36 bg-white/5 rounded-lg" />
+          <Skeleton className="h-10 w-36 bg-[var(--bg-hover)] rounded-lg" />
         </div>
         <div className="flex flex-wrap gap-4 items-center justify-between">
-          <Skeleton className="h-10 w-80 bg-white/5 rounded-full" />
+          <Skeleton className="h-10 w-80 bg-[var(--bg-hover)] rounded-full" />
           <div className="flex gap-4">
-            <Skeleton className="h-10 w-36 bg-white/5 rounded-md" />
-            <Skeleton className="h-10 w-36 bg-white/5 rounded-md" />
+            <Skeleton className="h-10 w-36 bg-[var(--bg-hover)] rounded-md" />
+            <Skeleton className="h-10 w-36 bg-[var(--bg-hover)] rounded-md" />
           </div>
         </div>
-        <Card className="glass-panel border-none shadow-none p-6! space-y-4">
+        <Card className="glass-panel border-none shadow-none space-y-4" style={{ padding: '24px' }}>
           <div className="space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex justify-between items-center py-2 border-b border-[var(--border-color)]">
                 <div className="flex gap-3 items-center flex-1">
-                  <Skeleton className="h-10 w-10 bg-white/5 rounded-full" />
+                  <Skeleton className="h-10 w-10 bg-[var(--bg-hover)] rounded-full" />
                   <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-1/4 bg-white/5" />
-                    <Skeleton className="h-3 w-1/3 bg-white/5" />
+                    <Skeleton className="h-4 w-1/4 bg-[var(--bg-hover)]" />
+                    <Skeleton className="h-3 w-1/3 bg-[var(--bg-hover)]" />
                   </div>
                 </div>
                 <div className="flex gap-16 items-center">
-                  <Skeleton className="h-6 w-20 bg-white/5 rounded-full" />
-                  <Skeleton className="h-4 w-24 bg-white/5" />
-                  <Skeleton className="h-6 w-16 bg-white/5 rounded-full" />
-                  <Skeleton className="h-8 w-16 bg-white/5" />
+                  <Skeleton className="h-6 w-20 bg-[var(--bg-hover)] rounded-full" />
+                  <Skeleton className="h-4 w-24 bg-[var(--bg-hover)]" />
+                  <Skeleton className="h-6 w-16 bg-[var(--bg-hover)] rounded-full" />
+                  <Skeleton className="h-8 w-16 bg-[var(--bg-hover)]" />
                 </div>
               </div>
             ))}
@@ -180,10 +180,10 @@ export default function Users() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col" style={{ gap: '24px' }}>
       {/* Title section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
+        <div className="flex flex-col" style={{ gap: '6px' }}>
           <h1 className="font-headline-lg text-headline-lg text-on-surface">Quản Lý Tài Khoản</h1>
           <p className="text-secondary text-body-md">Hiển thị danh sách người dùng toàn hệ thống và phân quyền truy cập.</p>
         </div>
@@ -205,13 +205,14 @@ export default function Users() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div className="relative flex-1 max-w-sm w-full">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
-          <Input 
+          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" />
+          <input 
             type="text" 
             placeholder="Tìm theo tên, email..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-surface-container text-on-surface border-none rounded-full pl-10 pr-4 h-10 text-body-md focus-visible:ring-2 focus-visible:ring-primary-container w-full transition-all focus-visible:outline-none"
+            style={{ paddingLeft: '42px', paddingRight: '16px', height: '40px' }}
+            className="bg-surface-container text-on-surface border-none rounded-full text-body-md focus-visible:ring-2 focus-visible:ring-primary-container w-full transition-all focus-visible:outline-none"
           />
         </div>
 
@@ -241,22 +242,22 @@ export default function Users() {
 
       {/* Users Table Card */}
       <Card className="glass-panel border-none shadow-none">
-        <CardContent className="p-0! overflow-x-auto">
+        <CardContent className="overflow-x-auto" style={{ padding: '0px' }}>
           <table className="w-full border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border-color)]">
-                <th className="p-4 text-secondary font-semibold">Họ Tên</th>
-                <th className="p-4 text-secondary font-semibold">Vai Trò</th>
-                <th className="p-4 text-secondary font-semibold">Ngày Tham Gia</th>
-                <th className="p-4 text-secondary font-semibold">Trạng Thái</th>
-                <th className="p-4 text-secondary font-semibold text-right">Hành Động</th>
+                <th className="text-secondary font-semibold" style={{ padding: '18px 24px' }}>Họ Tên</th>
+                <th className="text-secondary font-semibold" style={{ padding: '18px 24px' }}>Vai Trò</th>
+                <th className="text-secondary font-semibold" style={{ padding: '18px 24px' }}>Ngày Tham Gia</th>
+                <th className="text-secondary font-semibold" style={{ padding: '18px 24px' }}>Trạng Thái</th>
+                <th className="text-secondary font-semibold text-right" style={{ padding: '18px 24px' }}>Hành Động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-color)]">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-[var(--bg-hover)] transition-colors">
-                    <td className="p-4">
+                    <td style={{ padding: '18px 24px' }}>
                       <div className="flex items-center gap-3">
                         <Avatar className="w-10 h-10 border border-[var(--border-color)] flex-shrink-0">
                           <AvatarFallback className="bg-gradient-to-tr from-primary-container to-on-primary-fixed-variant text-white font-bold">
@@ -269,18 +270,18 @@ export default function Users() {
                         </div>
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td style={{ padding: '18px 24px' }}>
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold 
                         ${user.role === 'Super Admin' 
                           ? 'bg-primary-container/20 text-primary-container' 
-                          : 'bg-white/5 text-secondary'
+                          : 'bg-[var(--bg-hover)] text-secondary'
                         }
                       `}>
                         {user.role}
                       </span>
                     </td>
-                    <td className="p-4 text-secondary">{user.joinedDate}</td>
-                    <td className="p-4">
+                    <td className="text-secondary" style={{ padding: '18px 24px' }}>{user.joinedDate}</td>
+                    <td style={{ padding: '18px 24px' }}>
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full 
                           ${user.status === 'active' ? 'bg-green-500' : 'bg-red-500'}
@@ -290,7 +291,7 @@ export default function Users() {
                         </span>
                       </div>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="text-right" style={{ padding: '18px 24px' }}>
                       <div className="flex items-center justify-end gap-1">
                         <Button 
                           variant="ghost" 
@@ -317,7 +318,7 @@ export default function Users() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center p-8 text-secondary">
+                  <td colSpan={5} className="text-center text-secondary" style={{ padding: '32px' }}>
                     Không tìm thấy tài khoản phù hợp.
                   </td>
                 </tr>

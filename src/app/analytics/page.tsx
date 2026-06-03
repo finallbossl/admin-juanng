@@ -76,7 +76,7 @@ export default function Analytics() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="glass-panel border-none shadow-none p-6! space-y-4">
+            <Card key={i} className="glass-panel border-none shadow-none space-y-4" style={{ padding: '24px' }}>
               <div className="flex items-center gap-2">
                 <Skeleton className="h-5 w-5 bg-[var(--bg-hover)] rounded-full" />
                 <Skeleton className="h-5 w-40 bg-[var(--bg-hover)]" />
@@ -108,12 +108,12 @@ export default function Analytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Performance metrics */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
+          <CardHeader className="border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0" style={{ padding: '24px 24px 16px 24px' }}>
             <Cpu size={20} className="text-primary" />
             <CardTitle className="font-headline-sm text-headline-sm">Hiệu Năng Máy Chủ (Tự động cập nhật mỗi 5s)</CardTitle>
           </CardHeader>
           
-          <CardContent className="p-6! space-y-5">
+          <CardContent className="space-y-5" style={{ padding: '24px' }}>
             {performanceStats.map((stat, idx) => (
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
@@ -135,15 +135,15 @@ export default function Analytics() {
 
         {/* System metrics summary */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
-            <Server size={20} className="text-blue-400" />
+          <CardHeader className="border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0" style={{ padding: '24px 24px 16px 24px' }}>
+            <Server size={20} className="text-blue-600 dark:text-blue-400" />
             <CardTitle className="font-headline-sm text-headline-sm">Thông Tin Máy Chủ</CardTitle>
           </CardHeader>
 
-          <CardContent className="p-6! space-y-3.5">
+          <CardContent className="space-y-3.5" style={{ padding: '24px' }}>
             <div className="flex justify-between items-center text-sm">
               <span className="text-secondary">Trạng thái dịch vụ</span>
-              <span className="font-semibold text-primary">Hoạt động bình thường</span>
+              <span className="font-semibold text-green-600 dark:text-green-400">Hoạt động bình thường</span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-secondary">Thời gian uptime</span>
@@ -170,12 +170,12 @@ export default function Analytics() {
 
         {/* Browser breakdown */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
-            <Globe size={20} className="text-yellow-500" />
+          <CardHeader className="border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0" style={{ padding: '24px 24px 16px 24px' }}>
+            <Globe size={20} className="text-yellow-600 dark:text-yellow-500" />
             <CardTitle className="font-headline-sm text-headline-sm">Trình Duyệt Truy Cập</CardTitle>
           </CardHeader>
 
-          <CardContent className="p-6! space-y-3.5">
+          <CardContent className="space-y-3.5" style={{ padding: '24px' }}>
             {browserStats.map((stat, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm">
                 <span className="text-secondary">{stat.label}</span>
@@ -187,12 +187,12 @@ export default function Analytics() {
 
         {/* Region breakdown */}
         <Card className="glass-panel border-none shadow-none">
-          <CardHeader className="p-6! pb-4! border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0">
-            <Globe size={20} className="text-red-400" />
+          <CardHeader className="border-b border-[var(--border-color)] flex flex-row items-center gap-2 space-y-0" style={{ padding: '24px 24px 16px 24px' }}>
+            <Globe size={20} className="text-red-600 dark:text-red-400" />
             <CardTitle className="font-headline-sm text-headline-sm">Khu Vực Địa Lý</CardTitle>
           </CardHeader>
 
-          <CardContent className="p-6! space-y-3.5">
+          <CardContent className="space-y-3.5" style={{ padding: '24px' }}>
             {regionStats.map((stat, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm">
                 <span className="text-secondary">{stat.label}</span>

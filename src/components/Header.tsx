@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useSidebar } from '@/components/ui/sidebar';
 import {
@@ -39,6 +39,7 @@ const NOTIFICATIONS = [
 export default function Header({ onToggleMobileSidebar }: HeaderProps) {
   const { toggleSidebar } = useSidebar();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { theme, toggle: toggleTheme, mounted: themeMounted } = useTheme();
   const isDark = theme === 'dark';
 
@@ -102,8 +103,24 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const meta = PAGE_META[pathname] ?? { main: 'CineAdmin', sub: '', icon: '⬡' };
+  const metaRaw = PAGE_META[pathname] ?? { main: 'CineAdmin', sub: '', icon: '⬡' };
   const unreadCount = NOTIFICATIONS.filter(n => n.unread).length;
+
+  const isAddMode = searchParams.get('add') === 'true';
+  const currentTab = searchParams.get('tab');
+
+  let pageTitle = metaRaw.main;
+  let pageSub = metaRaw.sub;
+
+  if (pathname === '/products') {
+    if (isAddMode) {
+      pageTitle = 'Thêm Phim Mới';
+      pageSub = 'Thêm nội dung phim mới vào hệ thống';
+    } else if (currentTab === 'genres') {
+      pageTitle = 'Thể Loại Phim';
+      pageSub = 'Quản lý danh mục thể loại phim';
+    }
+  }
 
   const handleRefresh = () => {
     setRefreshSpin(true);
@@ -177,24 +194,24 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
               width: '34px',
               height: '34px',
               borderRadius: '10px',
-              border: '1px solid rgba(255,255,255,0.07)',
-              background: 'rgba(255,255,255,0.03)',
-              color: 'rgba(255,255,255,0.5)',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-hover)',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               flexShrink: 0,
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLElement;
-              el.style.background = 'rgba(229,9,20,0.1)';
-              el.style.borderColor = 'rgba(229,9,20,0.35)';
-              el.style.color = '#E50914';
+              el.style.background = 'var(--accent-dim)';
+              el.style.borderColor = 'var(--border-accent)';
+              el.style.color = 'var(--accent)';
             }}
             onMouseLeave={e => {
               const el = e.currentTarget as HTMLElement;
-              el.style.background = 'rgba(255,255,255,0.03)';
-              el.style.borderColor = 'rgba(255,255,255,0.07)';
-              el.style.color = 'rgba(255,255,255,0.5)';
+              el.style.background = 'var(--bg-hover)';
+              el.style.borderColor = 'var(--border-color)';
+              el.style.color = 'var(--text-secondary)';
             }}
           >
             <Menu size={16} />
@@ -225,10 +242,10 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
               }}>
-                {meta.main}
+                {pageTitle}
               </h1>
               {/* Sub title */}
-              {meta.sub && (
+              {pageSub && (
                 <span style={{
                   fontSize: '10px',
                   fontWeight: 500,
@@ -239,7 +256,7 @@ export default function Header({ onToggleMobileSidebar }: HeaderProps) {
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}>
-                  {meta.sub}
+                  {pageSub}
                 </span>
               )}
             </div>

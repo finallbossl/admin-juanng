@@ -212,10 +212,10 @@ export default function Sidebar({ isOpenMobile, onCloseMobile }: SidebarProps = 
       strokeWidth: 2.0,
       className: `transition-all duration-300 flex-shrink-0 ${
         active
-          ? 'text-[#E50914] drop-shadow-[0_0_8px_rgba(229,9,20,0.8)] scale-105'
+          ? 'text-[var(--accent)] drop-shadow-[0_0_8px_var(--accent-glow)] scale-105'
           : isHovered
-            ? 'text-white scale-105'
-            : 'text-slate-355'
+            ? 'text-[var(--text-sidebar-active)] scale-105'
+            : 'text-[var(--text-sidebar)]'
       }`,
     };
 

@@ -67,7 +67,7 @@ export default function Settings() {
           <Skeleton className="h-8 w-64 bg-[var(--bg-hover)]" />
           <Skeleton className="h-4 w-96 bg-[var(--bg-hover)]" />
         </div>
-        <Card className="glass-panel border-none shadow-none p-6! space-y-6">
+        <Card className="glass-panel border-none shadow-none space-y-6" style={{ padding: '24px' }}>
           <div className="space-y-4">
             <Skeleton className="h-5 w-40 bg-[var(--bg-hover)]" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -102,7 +102,7 @@ export default function Settings() {
 
       <Card className="glass-panel border-none shadow-none">
         <form onSubmit={handleSubmit}>
-          <CardContent className="p-6! space-y-6">
+          <CardContent className="space-y-6" style={{ padding: '24px' }}>
             <div>
               <h2 className="text-base font-semibold text-on-surface border-b border-[var(--border-color)] pb-2 mb-4">Thông Tin Tài Khoản</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
