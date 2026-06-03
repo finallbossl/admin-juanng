@@ -204,7 +204,17 @@ function SettingsContent() {
   return (
     <div className="flex flex-col pb-12 gap-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--bg-secondary)]/50 backdrop-blur-md p-6 rounded-2xl border border-[var(--border-color)]">
+      <div 
+        style={{
+          padding: '24px 32px',
+          borderRadius: '16px',
+          border: '1px solid var(--border-color)',
+          background: 'var(--bg-glass-card)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+        className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm"
+      >
         <div className="flex flex-col gap-1.5">
           <h1 className="text-xl font-bold tracking-tight text-on-surface flex items-center gap-2">
             <SettingsIcon className="h-5 w-5 text-[var(--accent)] animate-pulse" />
@@ -455,33 +465,35 @@ function SettingsContent() {
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="border-b border-[var(--border-color)] bg-[var(--bg-hover)]/20 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[9.5px]">
-                        <th className="p-4">Nguồn phim</th>
-                        <th className="p-4">Hình thức</th>
-                        <th className="p-4">Chi tiết đồng bộ</th>
-                        <th className="p-4">Trạng thái</th>
-                        <th className="p-4 text-center">Đã thêm</th>
-                        <th className="p-4 text-center">Thời gian</th>
-                        <th className="p-4 text-right">Ngày thực hiện</th>
+                        <th style={{ padding: '14px 20px' }}>Nguồn phim</th>
+                        <th style={{ padding: '14px 20px' }}>Hình thức</th>
+                        <th style={{ padding: '14px 20px' }}>Chi tiết đồng bộ</th>
+                        <th style={{ padding: '14px 20px' }}>Trạng thái</th>
+                        <th style={{ padding: '14px 20px', textAlign: 'center' }}>Đã thêm</th>
+                        <th style={{ padding: '14px 20px', textAlign: 'center' }}>Thời gian</th>
+                        <th style={{ padding: '14px 20px', textAlign: 'right' }}>Ngày thực hiện</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border-color)]">
                       {MOCK_HISTORY.map((hist) => (
                         <tr key={hist.id} className="hover:bg-[var(--bg-hover)]/10 transition-colors">
-                          <td className="p-4 font-bold text-on-surface flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-                            {hist.source}
+                          <td style={{ padding: '16px 20px' }} className="font-bold text-on-surface">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
+                              {hist.source}
+                            </div>
                           </td>
-                          <td className="p-4 text-slate-500 dark:text-slate-400">{hist.type}</td>
-                          <td className="p-4 text-slate-700 dark:text-slate-300">
+                          <td style={{ padding: '16px 20px' }} className="text-slate-500 dark:text-slate-400">{hist.type}</td>
+                          <td style={{ padding: '16px 20px' }} className="text-slate-700 dark:text-slate-300">
                             {hist.detail}
                             {hist.error && (
-                              <div className="text-[10px] text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
+                              <div style={{ marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }} className="text-[10px] text-rose-600 dark:text-rose-400">
                                 <AlertTriangle size={11} />
                                 {hist.error}
                               </div>
                             )}
                           </td>
-                          <td className="p-4">
+                          <td style={{ padding: '16px 20px' }}>
                             <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase border
                               ${hist.status === 'SUCCESS' 
                                 ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' 
@@ -491,9 +503,9 @@ function SettingsContent() {
                               {hist.status === 'SUCCESS' ? 'Thành công' : 'Thất bại'}
                             </span>
                           </td>
-                          <td className="p-4 text-center font-bold text-on-surface">{hist.count} phim</td>
-                          <td className="p-4 text-center text-slate-500 dark:text-slate-400">{hist.time}</td>
-                          <td className="p-4 text-right text-slate-500 dark:text-slate-400 font-mono text-[10px]">{hist.date}</td>
+                          <td style={{ padding: '16px 20px', textAlign: 'center' }} className="font-bold text-on-surface">{hist.count} phim</td>
+                          <td style={{ padding: '16px 20px', textAlign: 'center' }} className="text-slate-500 dark:text-slate-400">{hist.time}</td>
+                          <td style={{ padding: '16px 20px', textAlign: 'right' }} className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">{hist.date}</td>
                         </tr>
                       ))}
                     </tbody>
