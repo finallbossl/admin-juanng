@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Save, 
@@ -49,6 +50,9 @@ function SettingsContent() {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get('tab') || 'crawler'; // crawler | history
 
+  // Client Side Mount State
+  const [isMounted, setIsMounted] = useState(false);
+
   // Crawler Tab States
   const [sources, setSources] = useState<SyncSource[]>([]);
   const [sourcesLoading, setSourcesLoading] = useState(false);
@@ -65,6 +69,9 @@ function SettingsContent() {
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
 
+  // UI Interactive States
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
   // Fetch Crawler Sources
   const fetchSources = async () => {
     setSourcesLoading(true);
@@ -80,6 +87,7 @@ function SettingsContent() {
   };
 
   useEffect(() => {
+    setIsMounted(true);
     fetchSources();
   }, []);
 
@@ -177,16 +185,32 @@ function SettingsContent() {
     router.push(`/settings?tab=${tabName}`);
   };
 
+  // Input styling generator for focus glows (combating resets from shadcn/tailwind)
+  const getInputStyle = (fieldName: string) => ({
+    padding: '0 16px',
+    height: '44px',
+    width: '100%',
+    boxSizing: 'border-box' as const,
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--text-primary)',
+    borderRadius: '12px',
+    border: focusedField === fieldName ? '1px solid var(--border-accent)' : '1px solid var(--border-color)',
+    boxShadow: focusedField === fieldName ? '0 0 10px var(--accent-glow)' : 'none',
+    outline: 'none',
+    fontSize: '13px',
+    transition: 'all 0.2s ease-in-out',
+  });
+
   return (
     <div className="flex flex-col pb-12 gap-6 fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--bg-secondary)]/50 backdrop-blur-md p-6 rounded-2xl border border-[var(--border-color)]">
         <div className="flex flex-col gap-1.5">
           <h1 className="text-xl font-bold tracking-tight text-on-surface flex items-center gap-2">
-            <SettingsIcon className="h-5 w-5 text-[var(--accent)]" />
+            <SettingsIcon className="h-5 w-5 text-[var(--accent)] animate-pulse" />
             Thiết lập & Cấu hình hệ thống
           </h1>
-          <p className="text-secondary text-xs">Quản lý và cấu hình các nguồn phim tự động, xem lịch sử đồng bộ chi tiết.</p>
+          <p className="text-[var(--text-secondary)] text-xs">Quản lý và cấu hình các nguồn phim tự động, xem lịch sử đồng bộ chi tiết.</p>
         </div>
       </div>
 
@@ -194,16 +218,41 @@ function SettingsContent() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         {/* Left Column: Tab Navigator (Plain divs with style, no Shadcn cards) */}
-        <div className="lg:col-span-1 flex flex-col gap-2 p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/30">
-          <span className="text-[10px] font-bold text-secondary uppercase tracking-widest px-3 mb-2 block opacity-60">Danh mục cấu hình</span>
+        <div 
+          style={{
+            padding: '20px',
+            borderRadius: '16px',
+            border: '1px solid var(--border-color)',
+            background: 'var(--bg-glass-card)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}
+          className="lg:col-span-1 flex flex-col gap-2 shadow-lg"
+        >
+          <div className="flex items-center gap-2 mb-3 px-1 select-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest block opacity-75">Danh mục cấu hình</span>
+          </div>
 
           <button
             onClick={() => switchTab('crawler')}
-            className={`w-full py-3 px-4 rounded-xl font-semibold text-xs transition-all duration-200 cursor-pointer select-none text-left flex items-center gap-3
-              ${activeTab === 'crawler' 
-                ? 'bg-[var(--accent-dim)] text-[var(--accent)] border border-[var(--border-accent)] shadow-[0_0_10px_var(--accent-glow)]' 
-                : 'text-secondary hover:text-on-surface hover:bg-[var(--bg-hover)]/30 border border-transparent'
-              }`}
+            style={{ 
+              border: activeTab === 'crawler' ? '1px solid var(--border-accent)' : '1px solid transparent',
+              background: activeTab === 'crawler' ? 'var(--accent-dim)' : 'transparent',
+              color: activeTab === 'crawler' ? 'var(--accent)' : 'var(--text-secondary)',
+              transition: 'all 0.2s',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              textAlign: 'left' as const
+            }}
+            className="hover:bg-[var(--bg-hover)]/30 hover:translate-x-1"
           >
             <Database size={15} />
             Cấu hình nguồn phim
@@ -211,11 +260,23 @@ function SettingsContent() {
 
           <button
             onClick={() => switchTab('history')}
-            className={`w-full py-3 px-4 rounded-xl font-semibold text-xs transition-all duration-200 cursor-pointer select-none text-left flex items-center gap-3
-              ${activeTab === 'history' 
-                ? 'bg-[var(--accent-dim)] text-[var(--accent)] border border-[var(--border-accent)] shadow-[0_0_10px_var(--accent-glow)]' 
-                : 'text-secondary hover:text-on-surface hover:bg-[var(--bg-hover)]/30 border border-transparent'
-              }`}
+            style={{ 
+              border: activeTab === 'history' ? '1px solid var(--border-accent)' : '1px solid transparent',
+              background: activeTab === 'history' ? 'var(--accent-dim)' : 'transparent',
+              color: activeTab === 'history' ? 'var(--accent)' : 'var(--text-secondary)',
+              transition: 'all 0.2s',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              fontSize: '12px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              textAlign: 'left' as const
+            }}
+            className="hover:bg-[var(--bg-hover)]/30 hover:translate-x-1"
           >
             <History size={15} />
             Lịch sử đồng bộ
@@ -230,18 +291,28 @@ function SettingsContent() {
             <div className="flex flex-col gap-6">
               
               {/* sources list card */}
-              <div className="glass-panel rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
+              <div 
+                style={{
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-glass-card)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                }}
+                className="shadow-lg"
+              >
                 
                 {/* Header */}
-                <div className="flex justify-between items-center" style={{ padding: '24px 32px', borderBottom: '1px solid var(--border-color)' }}>
+                <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border-color)' }} className="flex justify-between items-center bg-[var(--bg-secondary)]/30">
                   <div className="font-semibold text-on-surface text-base flex items-center gap-2">
                     <Database className="h-5 w-5 text-[var(--accent)]" />
                     Quản lý nguồn phim (Sync Sources)
                   </div>
                   <button 
                     onClick={handleOpenAddDialog}
-                    style={{ padding: '8px 16px' }}
-                    className="bg-primary-container hover:bg-primary-container/90 text-white cursor-pointer font-bold shadow-sm text-xs rounded-xl flex items-center gap-1.5 transition-colors"
+                    style={{ padding: '10px 20px' }}
+                    className="bg-primary-container hover:bg-primary-container/90 text-white cursor-pointer font-bold shadow-sm text-xs rounded-xl flex items-center gap-1.5 transition-all duration-200 hover:scale-105 active:scale-95 shadow-primary-container/20"
                   >
                     <Plus size={14} />
                     Thêm nguồn mới
@@ -249,28 +320,26 @@ function SettingsContent() {
                 </div>
 
                 {/* Content */}
-                {sourcesLoading ? (
-                  <div style={{ padding: '32px' }} className="space-y-4">
-                    <CustomSkeleton className="h-16 w-full" />
-                    <CustomSkeleton className="h-16 w-full" />
-                    <CustomSkeleton className="h-16 w-full" />
-                  </div>
-                ) : sourcesError ? (
-                  <div style={{ padding: '32px' }}>
-                    <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-5 py-4 rounded-xl text-xs flex items-center gap-2">
-                      <AlertTriangle size={15} />
-                      {sourcesError}
+                <div style={{ padding: '32px' }}>
+                  {sourcesLoading ? (
+                    <div className="space-y-4">
+                      <CustomSkeleton className="h-16 w-full" />
+                      <CustomSkeleton className="h-16 w-full" />
+                      <CustomSkeleton className="h-16 w-full" />
                     </div>
-                  </div>
-                ) : sources.length === 0 ? (
-                  <div style={{ padding: '64px' }} className="text-center text-xs text-secondary border border-dashed border-[var(--border-color)] m-8 rounded-2xl bg-[var(--bg-hover)]/10 flex flex-col items-center gap-3">
-                    <Globe className="h-9 w-9 text-slate-600" />
-                    <span>Không có cấu hình nguồn phim nào được tạo. Nhấp "+ Thêm nguồn mới" để bắt đầu.</span>
-                  </div>
-                ) : (
-                  <div style={{ padding: '32px' }} className="space-y-5">
-                    
-                    {/* Sources Grid */}
+                  ) : sourcesError ? (
+                    <div>
+                      <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-5 py-4 rounded-xl text-xs flex items-center gap-2">
+                        <AlertTriangle size={15} />
+                        {sourcesError}
+                      </div>
+                    </div>
+                  ) : sources.length === 0 ? (
+                    <div style={{ padding: '64px' }} className="text-center text-xs text-[var(--text-secondary)] border border-dashed border-[var(--border-color)] rounded-2xl bg-[var(--bg-hover)]/10 flex flex-col items-center gap-3">
+                      <Globe className="h-9 w-9 text-slate-400 dark:text-slate-600" />
+                      <span>Không có cấu hình nguồn phim nào được tạo. Nhấp "+ Thêm nguồn mới" để bắt đầu.</span>
+                    </div>
+                  ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {sources.map((src) => {
                         let domain = 'unknown';
@@ -281,7 +350,13 @@ function SettingsContent() {
                         return (
                           <div 
                             key={src.id}
-                            className="p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-hover)]/10 hover:bg-[var(--bg-hover)]/20 transition-all flex flex-col justify-between gap-4"
+                            style={{
+                              border: '1px solid var(--border-color)',
+                              background: 'var(--bg-secondary)',
+                              padding: '20px',
+                              borderRadius: '16px',
+                            }}
+                            className="hover:bg-[var(--bg-hover)]/20 transition-all flex flex-col justify-between gap-4"
                           >
                             <div className="flex justify-between items-start gap-4">
                               <div className="flex items-center gap-3 min-w-0">
@@ -290,7 +365,7 @@ function SettingsContent() {
                                 </div>
                                 <div className="min-w-0">
                                   <h4 className="font-bold text-xs text-on-surface truncate">{src.name}</h4>
-                                  <span className="text-[10px] text-secondary truncate block mt-1">{domain}</span>
+                                  <span className="text-[10px] text-[var(--text-secondary)] truncate block mt-1">{domain}</span>
                                 </div>
                               </div>
                               
@@ -299,30 +374,30 @@ function SettingsContent() {
                                 <button 
                                   onClick={() => handleToggleActive(src)}
                                   className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none cursor-pointer
-                                    ${src.active ? 'bg-[var(--accent)]' : 'bg-slate-700'}`}
+                                    ${src.active ? 'bg-[var(--accent)]' : 'bg-slate-300 dark:bg-slate-700'}`}
                                 >
                                   <span
                                     className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform
                                       ${src.active ? 'translate-x-4.5' : 'translate-x-0.5'}`}
                                   />
                                 </button>
-                                <span className={`text-[8.5px] font-bold ${src.active ? 'text-emerald-500' : 'text-slate-500'} uppercase select-none`}>
+                                <span className={`text-[8.5px] font-bold ${src.active ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'} uppercase select-none`}>
                                   {src.active ? 'Bật' : 'Tắt'}
                                 </span>
                               </div>
                             </div>
 
                             <div className="space-y-1.5 border-t border-[var(--border-color)] pt-3.5 text-[10.5px]">
-                              <div className="flex items-center gap-1.5 text-secondary truncate">
-                                <Link2 size={12} className="flex-shrink-0" />
-                                <span className="font-mono text-slate-400 truncate">{src.listUrlPattern}</span>
+                              <div className="flex items-center gap-1.5 text-[var(--text-secondary)] truncate">
+                                <Link2 size={12} className="flex-shrink-0 text-slate-400 dark:text-slate-500" />
+                                <span className="font-mono text-slate-600 dark:text-slate-400 truncate">{src.listUrlPattern}</span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-secondary truncate">
-                                <Link2 size={12} className="flex-shrink-0" />
-                                <span className="font-mono text-slate-400 truncate">{src.detailUrlBase}</span>
+                              <div className="flex items-center gap-1.5 text-[var(--text-secondary)] truncate">
+                                <Link2 size={12} className="flex-shrink-0 text-slate-400 dark:text-slate-500" />
+                                <span className="font-mono text-slate-600 dark:text-slate-400 truncate">{src.detailUrlBase}</span>
                               </div>
                               {src.lastSyncedAt && (
-                                <div className="flex items-center gap-1.5 text-slate-500 mt-1">
+                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 mt-1">
                                   <Calendar size={12} />
                                   <span>Đồng bộ lần cuối: {new Date(src.lastSyncedAt).toLocaleString('vi-VN')}</span>
                                 </div>
@@ -332,14 +407,14 @@ function SettingsContent() {
                             <div className="flex justify-end gap-2 border-t border-[var(--border-color)] pt-3.5 mt-1">
                               <button 
                                 onClick={() => handleOpenEditDialog(src)}
-                                className="p-2 border border-[var(--border-color)] text-secondary hover:text-on-surface hover:bg-[var(--bg-hover)]/30 rounded-xl transition-all cursor-pointer"
+                                className="p-2 border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-on-surface hover:bg-[var(--bg-hover)]/30 rounded-xl transition-all cursor-pointer"
                                 title="Sửa cấu hình"
                               >
                                 <Edit2 size={13} />
                               </button>
                               <button 
                                 onClick={() => src.id && handleDeleteSource(src.id)}
-                                className="p-2 border border-[var(--border-color)] text-secondary hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+                                className="p-2 border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
                                 title="Xóa nguồn"
                               >
                                 <Trash2 size={13} />
@@ -349,16 +424,26 @@ function SettingsContent() {
                         );
                       })}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}
 
           {/* TAB 2: SYNC HISTORY */}
           {activeTab === 'history' && (
-            <div className="glass-panel rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
-              <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border-color)' }}>
+            <div 
+              style={{
+                border: '1px solid var(--border-color)',
+                background: 'var(--bg-glass-card)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+              }}
+              className="shadow-lg"
+            >
+              <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border-color)' }} className="bg-[var(--bg-secondary)]/30">
                 <div className="font-semibold text-on-surface text-base flex items-center gap-2">
                   <History className="h-5 w-5 text-[var(--accent)]" />
                   Lịch sử đồng bộ phim (Sync History)
@@ -369,7 +454,7 @@ function SettingsContent() {
                 <div className="overflow-x-auto border border-[var(--border-color)] rounded-2xl bg-surface/50 shadow-inner">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-[var(--border-color)] bg-[var(--bg-hover)]/20 text-slate-400 font-bold uppercase tracking-wider text-[9.5px]">
+                      <tr className="border-b border-[var(--border-color)] bg-[var(--bg-hover)]/20 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[9.5px]">
                         <th className="p-4">Nguồn phim</th>
                         <th className="p-4">Hình thức</th>
                         <th className="p-4">Chi tiết đồng bộ</th>
@@ -386,11 +471,11 @@ function SettingsContent() {
                             <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
                             {hist.source}
                           </td>
-                          <td className="p-4 text-slate-400">{hist.type}</td>
-                          <td className="p-4 text-slate-300">
+                          <td className="p-4 text-slate-500 dark:text-slate-400">{hist.type}</td>
+                          <td className="p-4 text-slate-700 dark:text-slate-300">
                             {hist.detail}
                             {hist.error && (
-                              <div className="text-[10px] text-rose-400 mt-1 flex items-center gap-1">
+                              <div className="text-[10px] text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1">
                                 <AlertTriangle size={11} />
                                 {hist.error}
                               </div>
@@ -399,16 +484,16 @@ function SettingsContent() {
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase border
                               ${hist.status === 'SUCCESS' 
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20' 
+                                : 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20'
                               }`}
                             >
                               {hist.status === 'SUCCESS' ? 'Thành công' : 'Thất bại'}
                             </span>
                           </td>
                           <td className="p-4 text-center font-bold text-on-surface">{hist.count} phim</td>
-                          <td className="p-4 text-center text-slate-400">{hist.time}</td>
-                          <td className="p-4 text-right text-slate-500 font-mono text-[10px]">{hist.date}</td>
+                          <td className="p-4 text-center text-slate-500 dark:text-slate-400">{hist.time}</td>
+                          <td className="p-4 text-right text-slate-500 dark:text-slate-400 font-mono text-[10px]">{hist.date}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -422,85 +507,253 @@ function SettingsContent() {
       </div>
 
       {/* DIALOG DIAL / MODAL FOR ADD & EDIT SYNC SOURCE */}
-      {isDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      {/* Mounted via createPortal to body to completely bypass DashboardLayout component mount transforms bug */}
+      {isDialogOpen && isMounted && typeof window !== 'undefined' && createPortal(
+        <div 
+          style={{
+            zIndex: 9999,
+            background: 'rgba(0, 0, 0, 0.2)',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'stretch',
+          }}
+          className="fixed inset-0 animate-backdrop-custom"
+          onClick={() => { setIsDialogOpen(false); setEditingSource(null); }}
+        >
+          <style>{`
+            @keyframes dialogBackdropFade {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes drawerSlideLeft {
+              from { transform: translateX(100%); }
+              to { transform: translateX(0); }
+            }
+            .animate-backdrop-custom {
+              animation: dialogBackdropFade 0.2s ease-out forwards;
+            }
+            .animate-drawer-custom {
+              animation: drawerSlideLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+          `}</style>
           <div 
-            className="w-full max-w-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-xl overflow-hidden"
+            style={{ 
+              borderLeft: '1px solid var(--border-color)', 
+              width: '460px',
+              maxWidth: '100%',
+              background: 'var(--bg-surface)',
+              boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0,
+              height: '100%',
+            }}
+            className="animate-drawer-custom"
             onClick={e => e.stopPropagation()}
           >
             {/* Dialog Header */}
-            <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-tertiary)]/50">
-              <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
-                <Database size={15} className="text-[var(--accent)]" />
-                {editingSource ? 'Chỉnh sửa cấu hình nguồn phim' : 'Thêm cấu hình nguồn phim mới'}
+            <div 
+              style={{ 
+                borderBottom: '1px solid var(--border-color)',
+                padding: '20px 32px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'var(--bg-secondary)',
+              }}
+            >
+              <h3 
+                style={{
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  color: 'var(--text-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  margin: 0,
+                }}
+              >
+                <Database size={16} className="text-[var(--accent)] animate-pulse" />
+                {editingSource ? 'Chỉnh sửa nguồn phim' : 'Thêm cấu hình nguồn mới'}
               </h3>
               <button 
                 onClick={() => { setIsDialogOpen(false); setEditingSource(null); }}
-                className="text-secondary hover:text-on-surface transition-colors cursor-pointer p-1.5 rounded-lg hover:bg-[var(--bg-hover)]"
+                style={{
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                }}
+                className="hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
               >
                 <X size={16} />
               </button>
             </div>
 
             {/* Dialog Form */}
-            <form onSubmit={handleSaveSource} className="p-6 space-y-4">
+            <form 
+              onSubmit={handleSaveSource} 
+              style={{
+                padding: '32px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
               {formError && (
-                <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2">
-                  <AlertTriangle size={14} />
+                <div 
+                  style={{
+                    color: '#fca5a5',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <AlertTriangle size={14} style={{ flexShrink: 0 }} />
                   {formError}
                 </div>
               )}
               {formSuccess && (
-                <div className="text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 rounded-xl text-xs flex items-center gap-2">
-                  <Check size={14} />
+                <div 
+                  style={{
+                    color: '#86efac',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                    padding: '10px 16px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <Check size={14} style={{ flexShrink: 0 }} />
                   {formSuccess}
                 </div>
               )}
               
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-secondary">Tên nguồn phim *</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label 
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: 'var(--text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    paddingLeft: '4px',
+                    margin: 0,
+                  }}
+                >
+                  Tên nguồn phim *
+                </label>
                 <input 
                   type="text"
                   required
                   value={sourceName}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
                   onChange={e => setSourceName(e.target.value)}
                   placeholder="Ví dụ: OPhim, KKPhim..."
-                  style={{ padding: '0 16px', height: '42px' }}
-                  className="w-full bg-surface border border-[var(--border-color)] text-on-surface rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary-container"
+                  style={getInputStyle('name')}
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-secondary">Cấu hình URL danh sách (List URL Pattern) *</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label 
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: 'var(--text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    paddingLeft: '4px',
+                    margin: 0,
+                  }}
+                >
+                  Mẫu URL danh sách (List URL Pattern) *
+                </label>
                 <input 
                   type="text"
                   required
                   value={listUrlPattern}
+                  onFocus={() => setFocusedField('pattern')}
+                  onBlur={() => setFocusedField(null)}
                   onChange={e => setListUrlPattern(e.target.value)}
                   placeholder="Ví dụ: https://ophim1.com/danh-sach/phim-moi-cap-nhat?page={page}"
-                  style={{ padding: '0 16px', height: '42px' }}
-                  className="w-full bg-surface border border-[var(--border-color)] text-on-surface rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary-container font-mono"
+                  style={getInputStyle('pattern')}
+                  className="font-mono"
                 />
-                <p className="text-[10px] text-slate-500 mt-1">Sử dụng tham số `{`page`}` để hệ thống tự động thay số trang khi đồng bộ.</p>
+                <p 
+                  style={{
+                    fontSize: '10.5px',
+                    color: 'var(--text-muted)',
+                    lineHeight: '1.4',
+                    paddingLeft: '4px',
+                    marginTop: '2px',
+                    marginBottom: 0,
+                  }}
+                >
+                  Sử dụng <code style={{ background: 'var(--bg-hover)', padding: '2px 4px', borderRadius: '4px', fontFamily: 'monospace' }}>{"{page}"}</code> để hệ thống tự động thay số trang khi đồng bộ.
+                </p>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-secondary">Đường dẫn chi tiết gốc (Detail URL Base) *</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label 
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: 'var(--text-secondary)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    paddingLeft: '4px',
+                    margin: 0,
+                  }}
+                >
+                  Đường dẫn chi tiết gốc (Detail URL Base) *
+                </label>
                 <input 
                   type="text"
                   required
                   value={detailUrlBase}
+                  onFocus={() => setFocusedField('detail')}
+                  onBlur={() => setFocusedField(null)}
                   onChange={e => setDetailUrlBase(e.target.value)}
                   placeholder="Ví dụ: https://ophim1.com/phim/{slug}"
-                  style={{ padding: '0 16px', height: '42px' }}
-                  className="w-full bg-surface border border-[var(--border-color)] text-on-surface rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary-container font-mono"
+                  style={getInputStyle('detail')}
+                  className="font-mono"
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-hover)]/30 mt-2">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-semibold text-on-surface">Kích hoạt nguồn này</span>
-                  <span className="text-[10px] text-secondary">Cho phép hiển thị và đồng bộ phim từ nguồn này.</span>
+              <div 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-hover)',
+                  marginTop: '4px',
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)' }}>Kích hoạt nguồn này</span>
+                  <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>Cho phép hiển thị và đồng bộ phim từ nguồn này.</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer select-none">
                   <input 
@@ -509,31 +762,66 @@ function SettingsContent() {
                     onChange={e => setSourceActive(e.target.checked)}
                     className="sr-only peer" 
                   />
-                  <div className="w-10 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--accent)]" style={{ transition: 'background-color 0.2s' }} />
+                  <div className="w-10 h-5 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--accent)]" style={{ transition: 'background-color 0.2s' }} />
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border-color)]">
+              <div 
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '12px',
+                  paddingTop: '20px',
+                  borderTop: '1px solid var(--border-color)',
+                  marginTop: '12px',
+                }}
+              >
                 <button 
                   type="button"
                   onClick={() => { setIsDialogOpen(false); setEditingSource(null); }}
-                  className="px-4 py-2 border border-[var(--border-color)] text-secondary hover:text-on-surface rounded-xl text-xs transition-colors cursor-pointer"
+                  style={{
+                    padding: '10px 18px',
+                    background: 'transparent',
+                    border: '1px solid var(--border-color)',
+                    color: 'var(--text-secondary)',
+                    borderRadius: '10px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  className="hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
                 >
                   Hủy
                 </button>
                 <button 
                   type="submit"
                   disabled={formLoading}
-                  className="px-4 py-2 bg-primary-container hover:bg-primary-container/90 text-white rounded-xl text-xs font-semibold shadow-md disabled:opacity-50 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  style={{
+                    padding: '10px 20px',
+                    background: 'var(--accent)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s',
+                  }}
+                  className="hover:opacity-90 active:scale-95 shadow-sm"
                 >
                   {formLoading ? (
                     <>
-                      <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%' }} className="animate-spin" />
                       <span>Đang lưu...</span>
                     </>
                   ) : (
                     <>
-                      <Save size={13} />
+                      <Save size={14} />
                       <span>Lưu cấu hình</span>
                     </>
                   )}
@@ -541,7 +829,8 @@ function SettingsContent() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
@@ -550,7 +839,7 @@ function SettingsContent() {
 
 export default function Settings() {
   return (
-    <Suspense fallback={<div className="text-secondary text-sm p-8">Đang tải thiết lập...</div>}>
+    <Suspense fallback={<div className="text-[var(--text-secondary)] text-sm p-8">Đang tải thiết lập...</div>}>
       <SettingsContent />
     </Suspense>
   );
