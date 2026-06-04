@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { Film, Trash2, Shield, ShieldAlert, Search, Plus, Save, Database, Upload, Globe, Users, Tv, Play, Image, Layers, Sparkles, Check, ArrowLeft, Eye } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Film, Trash2, Shield, ShieldAlert, Search, Plus, Save, Database, Upload, Globe, Users, Tv, Play, Image, Layers, Sparkles, Check, ArrowLeft, Eye, X } from 'lucide-react';
 import { api } from '@/utils/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,26 @@ interface Movie {
   year: number;
   premiumOnly: boolean;
   status: string;
+  content?: string;
+  posterUrl?: string;
+  thumbUrl?: string;
+  time?: string;
+  episodeCurrent?: string;
+  episodeTotal?: string;
+  categories?: Array<{ name: string; slug: string }>;
+  countries?: Array<{ name: string; slug: string }>;
+  actors?: Array<{ name: string; slug: string; avatarUrl?: string }>;
+  directors?: Array<{ name: string; slug: string; avatarUrl?: string }>;
+}
+
+interface Episode {
+  id: string;
+  serverName: string;
+  name: string;
+  slug: string;
+  filename: string;
+  linkEmbed: string;
+  linkM3u8: string;
 }
 
 export default function Products() {
@@ -52,6 +73,80 @@ function slugify(text: string): string {
     .replace(/\-\-+/g, '-'); // replace multiple - with single -
 }
 
+// Custom HLS Player to stream m3u8 files directly in the browser
+function M3u8Player({ src, title }: { src: string; title: string }) {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    let hls: any = null;
+
+    const initPlayer = () => {
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = src;
+      } else {
+        const loadScript = () => {
+          if ((window as any).Hls) {
+            const HlsClass = (window as any).Hls;
+            if (HlsClass.isSupported()) {
+              hls = new HlsClass();
+              hls.loadSource(src);
+              hls.attachMedia(video);
+            }
+          } else {
+            let script = document.querySelector('script[src="https://cdn.jsdelivr.net/npm/hls.js@1"]') as HTMLScriptElement;
+            if (!script) {
+              script = document.createElement('script');
+              script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1';
+              script.async = true;
+              document.head.appendChild(script);
+            }
+            
+            const handleLoad = () => {
+              const HlsClass = (window as any).Hls;
+              if (HlsClass && HlsClass.isSupported()) {
+                hls = new HlsClass();
+                hls.loadSource(src);
+                hls.attachMedia(video);
+              }
+            };
+
+            script.addEventListener('load', handleLoad);
+            return () => {
+              script.removeEventListener('load', handleLoad);
+            };
+          }
+        };
+        const cleanup = loadScript();
+        if (cleanup) return cleanup;
+      }
+    };
+
+    const cleanupLoad = initPlayer();
+
+    return () => {
+      if (hls) {
+        hls.destroy();
+      }
+      if (cleanupLoad) {
+        cleanupLoad();
+      }
+    };
+  }, [src]);
+
+  return (
+    <video 
+      ref={videoRef}
+      controls
+      autoPlay
+      className="w-full h-full object-contain bg-black"
+      title={title}
+    />
+  );
+}
+
 const AVAILABLE_GENRES = [
   'Hành động', 'Viễn tưởng', 'Kinh dị', 'Tình cảm', 'Hài hước', 
   'Hoạt hình', 'Cổ trang', 'Tài liệu', 'Phiêu lưu', 'Hình sự', 
@@ -75,8 +170,8 @@ function ProductsContent() {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Dual tab state
-  const [activeAddTab, setActiveAddTab] = useState<'sync' | 'manual'>('sync');
+  // Add tabs state
+  const [activeAddTab, setActiveAddTab] = useState<'sync' | 'manual' | 'url'>('sync');
 
   // API Sync States
   const [sources, setSources] = useState<any[]>([]);
@@ -90,6 +185,14 @@ function ProductsContent() {
   const [progressLogs, setProgressLogs] = useState<string[]>([]);
   const [progressCurrent, setProgressCurrent] = useState(0);
   const [progressTotal, setProgressTotal] = useState(0);
+
+  // Movie Detail Modal & Play Preview States
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [movieEpisodes, setMovieEpisodes] = useState<Episode[]>([]);
+  const [activeEpisode, setActiveEpisode] = useState<Episode | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Manual Add Form States
   const [name, setName] = useState('');
@@ -128,6 +231,7 @@ function ProductsContent() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+  const [directUrl, setDirectUrl] = useState('');
 
   const fetchMovies = async () => {
     setLoading(true);
@@ -401,6 +505,28 @@ function ProductsContent() {
     }
   };
 
+  const handleDirectUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!directUrl.trim()) {
+      setFormError('Vui lòng nhập đường dẫn (URL) chi tiết của phim.');
+      return;
+    }
+    setFormLoading(true);
+    setFormError('');
+    setFormSuccess('');
+
+    try {
+      const res = await api.post<string>(`/catalog/sync/crawl-by-url?url=${encodeURIComponent(directUrl.trim())}`);
+      setFormSuccess(`Đồng bộ phim thành công! Đã lưu phim với mã slug: ${res.result}`);
+      setDirectUrl('');
+      fetchMovies();
+    } catch (err: any) {
+      setFormError(err.message || 'Lỗi xảy ra khi đồng bộ từ URL.');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   const handleActorKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -448,6 +574,32 @@ function ProductsContent() {
 
   const removeEpisode = (index: number) => {
     setEpisodes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleViewDetails = async (movieSummary: Movie) => {
+    setDetailsLoading(true);
+    try {
+      const movieRes = await api.get<Movie>(`/catalog/movies/${movieSummary.id}`);
+      const fullMovie = movieRes.result;
+      
+      const epRes = await api.get<Episode[]>(`/catalog/movies/${movieSummary.id}/episodes`);
+      const episodesList = epRes.result || [];
+      
+      setSelectedMovie(fullMovie);
+      setMovieEpisodes(episodesList);
+      setIsDetailsOpen(true);
+      setIsPlaying(false);
+      
+      if (episodesList.length > 0) {
+        setActiveEpisode(episodesList[0]);
+      } else {
+        setActiveEpisode(null);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Không thể tải chi tiết bộ phim.');
+    } finally {
+      setDetailsLoading(false);
+    }
   };
 
   const filteredMovies = movies.filter(m => 
@@ -528,7 +680,7 @@ function ProductsContent() {
         </div>
 
         {/* Tab Controls */}
-        <div className="flex bg-[var(--bg-secondary)]/30 p-1.5 rounded-xl border border-[var(--border-color)] max-w-md">
+        <div className="flex bg-[var(--bg-secondary)]/30 p-1.5 rounded-xl border border-[var(--border-color)] max-w-2xl w-full">
           <button
             type="button"
             onClick={() => {
@@ -544,6 +696,23 @@ function ProductsContent() {
           >
             <Database size={13} />
             Đồng bộ tự động (API Sync)
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveAddTab('url');
+              setFormSuccess('');
+              setFormError('');
+              setDirectUrl('');
+            }}
+            className={`flex-1 py-2.5 px-4 rounded-lg font-semibold text-xs transition-all duration-200 cursor-pointer select-none text-center flex items-center justify-center gap-2
+              ${activeAddTab === 'url' 
+                ? 'bg-primary-container text-white shadow-sm shadow-primary-container/20' 
+                : 'text-secondary hover:text-on-surface'
+              }`}
+          >
+            <Globe size={13} />
+            Cào từ Link trực tiếp (Link Sync)
           </button>
           <button
             type="button"
@@ -955,6 +1124,82 @@ function ProductsContent() {
                   </div>
                 )}
 
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: DIRECT LINK SYNC */}
+        {activeAddTab === 'url' && (
+          <div className="flex flex-col gap-6 animate-fade-in">
+            <div className="glass-panel rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-color)' }}>
+              {/* Header */}
+              <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--border-color)' }}>
+                <div className="font-semibold text-on-surface text-base flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-[var(--accent)]" />
+                  Đồng bộ từ Link chi tiết API
+                </div>
+              </div>
+              
+              {/* Content */}
+              <div style={{ padding: '32px' }} className="space-y-6">
+                {formSuccess && (
+                  <div className="text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-5 py-4 rounded-2xl text-xs flex items-center gap-2">
+                    <Check size={16} />
+                    {formSuccess}
+                  </div>
+                )}
+                {formError && (
+                  <div className="text-red-300 bg-red-500/10 border border-red-500/20 px-5 py-4 rounded-2xl text-xs flex items-center gap-2">
+                    <ShieldAlert size={16} />
+                    {formError}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <p className="text-xs text-secondary leading-relaxed">
+                    Dán đường dẫn chi tiết của phim từ các API bên ngoài (ví dụ: <code className="text-[var(--accent)] bg-[var(--bg-hover)] px-1.5 py-0.5 rounded font-mono">https://vsmov.com/api/phim/tuyet-canh-ba</code> hoặc OPhim/KKPhim) để hệ thống tự động cào toàn bộ thông tin cùng các tập phim trực tiếp về database.
+                  </p>
+                </div>
+
+                <form onSubmit={handleDirectUrlSubmit} className="space-y-6">
+                  <div className="space-y-2.5">
+                    <label className="text-xs font-bold text-secondary uppercase tracking-wider">Đường dẫn chi tiết phim (API Detail URL)</label>
+                    <div className="relative w-full">
+                      <Globe size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" />
+                      <input 
+                        type="url" 
+                        required
+                        value={directUrl}
+                        onChange={(e) => setDirectUrl(e.target.value)}
+                        placeholder="https://vsmov.com/api/phim/ten-phim" 
+                        disabled={formLoading}
+                        style={{ paddingLeft: '44px', paddingRight: '16px', height: '48px' }}
+                        className="bg-surface text-on-surface border border-[var(--border-color)] rounded-xl text-sm focus-visible:ring-2 focus-visible:ring-primary-container w-full transition-all focus-visible:outline-none disabled:opacity-50"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <Button 
+                      type="submit" 
+                      disabled={formLoading}
+                      className="bg-primary-container hover:bg-primary-container/90 text-white cursor-pointer font-bold shadow-md shadow-primary-container/20 rounded-xl text-xs px-6 py-2.5 h-11 flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {formLoading ? (
+                        <>
+                          <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                          Đang cào dữ liệu...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={14} />
+                          Cào & Đồng bộ phim
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -1584,15 +1829,27 @@ function ProductsContent() {
                       </Button>
                     </td>
                     <td className="text-right" style={{ padding: '18px 24px' }}>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleDeleteMovie(movie.id)}
-                        className="text-[var(--danger)] hover:text-[var(--danger)]/80 hover:bg-[var(--bg-hover)] cursor-pointer h-8 w-8"
-                        title="Xóa phim"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
+                      <div className="flex justify-end gap-1.5">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          disabled={detailsLoading}
+                          onClick={() => handleViewDetails(movie)}
+                          className="text-[var(--accent)] hover:text-[var(--accent)]/80 hover:bg-[var(--bg-hover)] cursor-pointer h-8 w-8"
+                          title="Xem chi tiết & Xem phim trước"
+                        >
+                          <Eye size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleDeleteMovie(movie.id)}
+                          className="text-[var(--danger)] hover:text-[var(--danger)]/80 hover:bg-[var(--bg-hover)] cursor-pointer h-8 w-8"
+                          title="Xóa phim"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -1607,6 +1864,371 @@ function ProductsContent() {
           </table>
         </CardContent>
       </Card>
+
+      {/* OLED Dark Cyber-Cinematic details & player preview modal */}
+      {isDetailsOpen && selectedMovie && typeof window !== 'undefined' && createPortal(
+        <div 
+          style={{
+            zIndex: 9999,
+            background: 'rgba(0, 0, 0, 0.4)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
+          }}
+          className="fixed inset-0 animate-backdrop-custom"
+          onClick={() => { setIsDetailsOpen(false); setSelectedMovie(null); }}
+        >
+          <style>{`
+            @keyframes backdropFade {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes modalScaleUp {
+              from { transform: scale(0.95); opacity: 0; }
+              to { transform: scale(1); opacity: 1; }
+            }
+            @keyframes pulseScale {
+              0%, 100% { transform: scale(1); opacity: 0.9; }
+              50% { transform: scale(1.06); opacity: 1; }
+            }
+            .animate-backdrop-custom {
+              animation: backdropFade 0.2s ease-out forwards;
+            }
+            .animate-modal-custom {
+              animation: modalScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            .animate-pulse-custom {
+              animation: pulseScale 2s infinite ease-in-out;
+            }
+          `}</style>
+          <div 
+            style={{ 
+              border: '1px solid var(--border-color)', 
+              width: '960px',
+              maxWidth: '100%',
+              background: 'var(--bg-surface)',
+              boxShadow: '0 24px 48px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              maxHeight: '90vh',
+            }}
+            className="animate-modal-custom"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div 
+              style={{ 
+                borderBottom: '1px solid var(--border-color)',
+                padding: '20px 32px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'var(--bg-secondary)',
+              }}
+            >
+              <div className="min-w-0 flex-1">
+                <h3 className="font-bold text-sm text-on-surface uppercase tracking-wider flex items-center gap-2 mb-0.5">
+                  <Film size={16} className="text-[var(--accent)]" />
+                  Chi tiết & Xem trước phim
+                </h3>
+                <span className="text-[11px] text-secondary font-mono truncate block">{selectedMovie.name} ({selectedMovie.originName})</span>
+              </div>
+              <button 
+                onClick={() => { setIsDetailsOpen(false); setSelectedMovie(null); }}
+                className="text-secondary hover:bg-[var(--bg-hover)] hover:text-on-surface p-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Content Scrollable Area */}
+            <div className="flex-1 overflow-y-auto" style={{ padding: '32px' }}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Left side: Poster & Metadata Specs */}
+                <div className="lg:col-span-1 space-y-6">
+                  {/* Movie Poster Image Box */}
+                  <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden border border-[var(--border-color)] bg-[var(--bg-hover)]/30 relative flex items-center justify-center p-2 shadow-inner">
+                    <Film className="h-10 w-10 text-secondary/40 absolute" />
+                    {selectedMovie.posterUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img 
+                        src={selectedMovie.posterUrl} 
+                        alt={selectedMovie.name} 
+                        className="w-full h-full object-cover rounded-xl relative z-10" 
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Tech Specs list */}
+                  <div className="space-y-3.5 bg-[var(--bg-secondary)]/30 border border-[var(--border-color)] p-5 rounded-2xl text-xs">
+                    <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
+                      <span className="text-secondary">Năm sản xuất</span>
+                      <span className="font-semibold text-on-surface">{selectedMovie.year}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
+                      <span className="text-secondary">Chất lượng</span>
+                      <span className="bg-[var(--bg-hover)] text-on-surface px-2.5 py-0.5 rounded font-extrabold text-[10px]">{selectedMovie.quality}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
+                      <span className="text-secondary">Ngôn ngữ</span>
+                      <span className="font-semibold text-on-surface">{selectedMovie.lang}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
+                      <span className="text-secondary">Thời lượng</span>
+                      <span className="font-semibold text-on-surface">{selectedMovie.time || 'Chưa rõ'}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/50">
+                      <span className="text-secondary">Trạng thái phát</span>
+                      <span className="font-semibold text-on-surface">{selectedMovie.episodeCurrent || 'Hoàn tất'} ({selectedMovie.episodeTotal ? `${selectedMovie.episodeTotal} tập` : '1 tập'})</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-secondary">Phân hạng VIP</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase border
+                        ${selectedMovie.premiumOnly 
+                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' 
+                          : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                        }`}
+                      >
+                        {selectedMovie.premiumOnly ? 'VIP/Premium' : 'Miễn phí'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side: Video Player, Episodes & Info Details */}
+                <div className="lg:col-span-2 space-y-6">
+                  
+                  {/* 1. Video Player Container */}
+                  <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-[var(--border-color)] bg-black shadow-lg">
+                    {movieEpisodes.length === 0 || !movieEpisodes.some(ep => ep.linkEmbed || ep.linkM3u8) ? (
+                      /* No video links available */
+                      <div className="w-full h-full relative flex items-center justify-center bg-[var(--bg-hover)]">
+                        {selectedMovie.thumbUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img 
+                            src={selectedMovie.thumbUrl} 
+                            alt={selectedMovie.name} 
+                            className="absolute inset-0 w-full h-full object-cover opacity-25 blur-[1px]"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : null}
+                        <div className="absolute inset-0 bg-black/40" />
+                        <div className="relative z-10 flex flex-col items-center gap-3.5 p-6 text-center select-none">
+                          <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-inner">
+                            <Tv size={26} className="animate-pulse" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-xs text-on-surface uppercase tracking-wider">Chưa có phim</h4>
+                            <p className="text-[10px] text-secondary mt-1.5 max-w-[260px] leading-relaxed">
+                              Bộ phim này hiện chưa được cập nhật liên kết video để xem thử.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : !isPlaying ? (
+                      /* Click to Play Preview Overlay */
+                      <div 
+                        onClick={() => {
+                          if (activeEpisode && (activeEpisode.linkEmbed || activeEpisode.linkM3u8)) {
+                            setIsPlaying(true);
+                          }
+                        }}
+                        className="w-full h-full relative flex flex-col items-center justify-center cursor-pointer group animate-fade-in"
+                      >
+                        {selectedMovie.thumbUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img 
+                            src={selectedMovie.thumbUrl} 
+                            alt={selectedMovie.name} 
+                            className="absolute inset-0 w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : null}
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
+                        
+                        <div className="relative z-10 flex flex-col items-center gap-4 text-center p-6 select-none">
+                          <div className="w-16 h-16 rounded-full bg-[var(--accent)]/15 border-2 border-[var(--accent)] text-[var(--accent)] flex items-center justify-center shadow-lg shadow-[var(--accent)]/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-[var(--accent)]/25 group-hover:shadow-[var(--accent)]/30 animate-pulse-custom">
+                            <Play size={28} className="fill-[var(--accent)] translate-x-0.5" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-xs text-on-surface uppercase tracking-widest drop-shadow-md">
+                              {activeEpisode ? `Xem Thử: ${activeEpisode.name}` : 'Bắt Đầu Xem Thử'}
+                            </h4>
+                            <p className="text-[10px] text-secondary mt-1.5 max-w-[280px] leading-relaxed">
+                              Nhấn để tải trình phát video và bắt đầu xem thử.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : activeEpisode ? (
+                      activeEpisode.linkEmbed ? (
+                        <div className="w-full h-full relative">
+                          <iframe 
+                            src={activeEpisode.linkEmbed} 
+                            title={`${selectedMovie.name} - ${activeEpisode.name}`}
+                            className="w-full h-full border-none relative z-10"
+                            allowFullScreen
+                          />
+                          {/* Background loading text/spinner inside player container under the iframe */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black z-0">
+                            <div className="w-8 h-8 rounded-full border-2 border-slate-700 border-t-[var(--accent)] animate-spin" />
+                            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider animate-pulse">Đang tải trình phát...</span>
+                          </div>
+                        </div>
+                      ) : activeEpisode.linkM3u8 ? (
+                        <M3u8Player 
+                          src={activeEpisode.linkM3u8} 
+                          title={`${selectedMovie.name} - ${activeEpisode.name}`}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-secondary bg-black">
+                          Chưa có phim
+                        </div>
+                      )
+                    ) : (
+                      /* No active episode */
+                      <div className="w-full h-full relative flex items-center justify-center bg-[var(--bg-hover)]">
+                        {selectedMovie.thumbUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img 
+                            src={selectedMovie.thumbUrl} 
+                            alt={selectedMovie.name} 
+                            className="absolute inset-0 w-full h-full object-cover opacity-45"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
+                        ) : null}
+                        <div className="relative z-10 flex flex-col items-center gap-3.5 p-6 text-center select-none">
+                          <div className="w-14 h-14 rounded-full bg-[var(--accent)]/15 border border-[var(--accent)] flex items-center justify-center text-[var(--accent)] shadow-inner">
+                            <Tv size={26} className="animate-pulse" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-xs text-on-surface">Chưa có phim</h4>
+                            <p className="text-[10px] text-secondary mt-1">Phim chưa được cập nhật tập phim.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. Episode Selection List */}
+                  {movieEpisodes.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-secondary uppercase tracking-wider">Danh sách tập phim ({movieEpisodes.length})</label>
+                      <div className="flex flex-wrap gap-2.5 max-h-[120px] overflow-y-auto p-1">
+                        {movieEpisodes.map((ep) => {
+                          const isActive = activeEpisode?.id === ep.id;
+                          return (
+                            <button
+                              key={ep.id}
+                              type="button"
+                              onClick={() => { setActiveEpisode(ep); setIsPlaying(true); }}
+                              className={`px-3 py-1.5 rounded-lg text-[10.5px] font-semibold border transition-all cursor-pointer select-none
+                                ${isActive 
+                                  ? 'bg-primary-container text-white border-primary-container shadow-sm shadow-primary-container/20' 
+                                  : 'bg-[var(--bg-hover)]/30 text-secondary border-[var(--border-color)] hover:text-on-surface hover:border-[var(--border-hover)]'
+                                }`}
+                            >
+                              {ep.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. Movie Synopsis & Credits */}
+                  <div className="space-y-4 border-t border-[var(--border-color)] pt-5">
+                    {/* Story Plot */}
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-secondary uppercase tracking-wider">Nội dung cốt truyện</label>
+                      <p className="text-xs text-secondary leading-relaxed max-h-[160px] overflow-y-auto pr-2 scrollbar-thin">
+                        {selectedMovie.content || 'Nội dung cốt truyện chưa được cập nhật cho bộ phim này.'}
+                      </p>
+                    </div>
+
+                    {/* Genres, Actors, Directors Tags */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3 border-t border-[var(--border-color)]/30 text-[11px]">
+                      <div className="space-y-2">
+                        <span className="font-bold text-secondary block">Thể loại phim</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedMovie.categories && selectedMovie.categories.length > 0 ? (
+                            selectedMovie.categories.map((c, cIdx) => (
+                              <span key={cIdx} className="bg-[var(--bg-hover)] text-secondary border border-[var(--border-color)] px-2 py-0.5 rounded">
+                                {c.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-slate-500 italic">Chưa phân loại</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <span className="font-bold text-secondary block">Quốc gia</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedMovie.countries && selectedMovie.countries.length > 0 ? (
+                            selectedMovie.countries.map((c, cIdx) => (
+                              <span key={cIdx} className="bg-[var(--bg-hover)] text-secondary border border-[var(--border-color)] px-2 py-0.5 rounded">
+                                {c.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-slate-500 italic">Chưa phân loại</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 col-span-2">
+                        <span className="font-bold text-secondary block">Diễn viên chính</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedMovie.actors && selectedMovie.actors.length > 0 ? (
+                            selectedMovie.actors.map((a, aIdx) => (
+                              <span key={aIdx} className="bg-[var(--accent-dim)]/20 border border-[var(--accent)]/10 text-[var(--accent)] px-2.5 py-0.5 rounded-full font-semibold">
+                                {a.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-slate-500 italic">Chưa cập nhật danh sách diễn viên</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div 
+              style={{ 
+                borderTop: '1px solid var(--border-color)',
+                padding: '16px 32px',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                background: 'var(--bg-secondary)',
+              }}
+            >
+              <button 
+                onClick={() => { setIsDetailsOpen(false); setSelectedMovie(null); }}
+                style={{ padding: '8px 20px' }}
+                className="bg-primary-container hover:bg-primary-container/90 text-white cursor-pointer font-bold rounded-xl text-xs shadow-sm transition-all"
+              >
+                Đóng lại
+              </button>
+            </div>
+
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
